@@ -48,4 +48,37 @@ typedef	struct s_cmd
      struct s_cmd *next;
  }   t_cmd;
 
+ typedef enum e_type
+{
+	WORD,
+	PIPE,
+	REDIR_IN,
+	REDIR_OUT,
+	REDIR_OUT_APP,
+	HEREDOC
+} t_type;
+
+typedef struct s_token
+{
+	t_type type;
+	char   *value;
+	struct s_token *next;
+} t_token;
+
+
+typedef struct s_commnad
+{
+	char   **arg_lst;
+	char   *in_fd;
+	char   *out_fd;
+	struct s_commnad *next;
+} t_commnad;
+
+// typedef struct s_redir
+// {
+//     t_type type;
+//     char   *file;
+//     struct s_redir *next;
+// } t_redir;
+
 #endif
