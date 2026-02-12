@@ -6,7 +6,7 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/12 13:03:42 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/02/12 13:07:37 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,22 @@ sudo apt-get install libreadline-dev
 */
 void echo(char *s);
 void pwd(void);
+
+typedef struct s_redir
+{
+	char				*file;
+	int					type;
+	int					fd;
+	struct s_redir		*next;
+}	t_redir;
+
 typedef	struct s_cmd 
 {
      int infile; //fd for infile
      int outfile;
      char **args;
-    //still in work : struct for directors
-     int pipe[2];
+    t_redir	*redirs;
+    int pipe[2];
      struct s_cmd *next;
  }   t_cmd;
 
