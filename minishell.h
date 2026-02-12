@@ -6,12 +6,13 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/07 09:49:32 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/02/12 13:03:42 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
+
 #include <readline/readline.h>      // readlinne (ext fun)
 #include <readline/history.h>       // add_history, rl_clear_history, rl_on_new_line, rl_replace_line, rl_redisplay (ext func)
 #include <stdio.h>                  // printf, perror, strerror
@@ -21,10 +22,21 @@
 #include <sys/wait.h>               // wait, waitpid, wait3, wait4
 #include <signal.h>                 // signal, sigaction, kill, sigemptyset, sigaddset
 #include <dirent.h>                 // opendir, readdir, closedir
-#endif
 
 /*ext func like readline can be installed with 
 sudo apt-get update
 sudo apt-get install libreadline-dev
 */
+void echo(char *s);
+void pwd(void);
+typedef	struct s_cmd 
+{
+     int infile; //fd for infile
+     int outfile;
+     char **args;
+    //still in work : struct for directors
+     int pipe[2];
+     struct s_cmd *next;
+ }   t_cmd;
 
+#endif
