@@ -20,7 +20,10 @@ void pwd(void)
     printf("%s\n", cwd);
     free(cwd);
 }
-int main(void)
+
+// for testing only
+/*int main(void)
 {
+    // cc pwd.c
     pwd();
-}
+}*/
