@@ -51,7 +51,8 @@ int	ft_echo(char **args)
 }
 
 //for testing
-int main(int ac,char **av)
+/*int main(int ac,char **av)
 {
+	// cc echo.c
     ft_echo(av);
-}
+}*/
