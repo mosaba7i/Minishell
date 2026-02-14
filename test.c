@@ -40,7 +40,7 @@ int main(int argc,char **argv)
             if (pid == 0)
             {
                 execve("/bin/pwd", argv, NULL);
-                perror("execve failed my nigga");
+                perror("execve failed");
                 exit(0);
             }
             waitpid(pid, NULL, 0);
