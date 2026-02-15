@@ -109,4 +109,5 @@ void free_env(t_shell *shell);
 void echo(char *s);
 void pwd(void);
 void export(t_shell *shell, char **args);
+int	ft_exit(t_shell *shell, char **args);
 #endif
