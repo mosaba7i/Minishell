@@ -6,7 +6,7 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 17:40:14 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/13 17:40:55 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/02/16 17:00:48 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,11 @@ void free_env(t_shell *shell)
         free(tmp);
     }
     free(shell);
+}
+
+void free_1env(t_env *env)
+{
+    free(env->key);
+    free(env->value);
+    free(env);
 }
