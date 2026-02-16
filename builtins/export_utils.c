@@ -6,7 +6,7 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:11:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/14 15:09:08 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/02/16 15:41:56 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ static void add_env_back(t_env **env, t_env *new)
         tmp = tmp->next;
     tmp->next = new;
 }
-void export_var(t_env **env, char *arg)
+int export_var(t_env **env, char *arg)
 {
     char *equal;
     char *key;
@@ -75,17 +75,18 @@ void export_var(t_env **env, char *arg)
     if (!is_valid_identifier(arg))
     {
         printf("minishell: export: `%s': not a valid identifier\n", arg);
-        return;
+        return (1);
     }
     equal = ft_strchr(arg, '=');
     get_key_value(arg, &key, &value);
     existing = find_env(*env, key);
     if (existing && equal)
     {
-            free(existing->value);
-            existing->value = ft_strdup(value);
+        free(existing->value);
+        existing->value = ft_strdup(value);
     }
-    else
+    else if (!existing)
         add_env_back(env, create_env_node(key, value));
     free(key);
+    return (0);
 }
