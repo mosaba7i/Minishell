@@ -6,14 +6,13 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/12 13:07:37 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/02/14 15:17:31 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 #define MINISHELL_H
 
-#include "libft/libft.h"
 #include <readline/readline.h> // readlinne (ext fun)
 #include <readline/history.h>  // add_history, rl_clear_history, rl_on_new_line, rl_replace_line, rl_redisplay (ext func)
 #include <stdio.h>			   // printf, perror, strerror
@@ -23,14 +22,13 @@
 #include <sys/wait.h>		   // wait, waitpid, wait3, wait4
 #include <signal.h>			   // signal, sigaction, kill, sigemptyset, sigaddset
 #include <dirent.h>			   // opendir, readdir, closedir
-
+#include "./libft/libft.h"
+#include <limits.h> // PATH_MAX
+#include <errno.h>	// errno, perror, strerror
 /*ext func like readline can be installed with
 sudo apt-get update
 sudo apt-get install libreadline-dev
 */
-
-void echo(char *s);
-void pwd(void);
 
 typedef struct s_redir
 {
@@ -49,6 +47,8 @@ typedef struct s_cmd
 	int pipe[2];
 	struct s_cmd *next;
 } t_cmd;
+
+// Lujain's structs for tokens and commands and redirections (feb 12)
 
 typedef enum e_type
 {
@@ -82,4 +82,32 @@ typedef struct s_commnad
 //     struct s_redir *next;
 // } t_redir;
 
+// new structs for env and shell (feb 14)
+typedef struct s_env
+{
+	char *key;
+	char *value;
+	struct s_env *next;
+} t_env;
+
+typedef struct s_shell
+{
+	t_env *env; // linked list of environment variables
+	int exit_status;
+} t_shell;
+
+// init and free funcs
+t_shell *init_shell(char **envp);
+
+// buitltin functions && thier helpers
+void export_var(t_env **env, char *arg);
+void get_key_value(char *arg, char **key, char **value);
+void free_env(t_shell *shell);
+void echo(char *s);
+void pwd(void);
+void export(t_shell *shell, char **args);
+int ft_exit(t_shell *shell, char **args);
+int ft_cd(t_shell *shell, t_cmd *cmd);
+int ft_env(t_shell *shell);
+int ft_unset(t_shell *shell, char **args);
 #endif

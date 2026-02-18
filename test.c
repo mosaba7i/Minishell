@@ -26,6 +26,7 @@ void sighand(int sig)
 
 int main(int argc,char **argv)
 {
+    // cc test.c -L ./libft/ -lft -lreadline
     signal(SIGINT, sighand);
     while (1)
     {
@@ -33,14 +34,14 @@ int main(int argc,char **argv)
         if (!line)
             break;
         
-        if (strcmp(line, "pwd") == 0)
+        if (ft_strncmp(line, "pwd",3) == 0)
         {
             int pid;
             pid = fork();
             if (pid == 0)
             {
                 execve("/bin/pwd", argv, NULL);
-                perror("execve failed my nigga");
+                perror("execve failed");
                 exit(0);
             }
             waitpid(pid, NULL, 0);
