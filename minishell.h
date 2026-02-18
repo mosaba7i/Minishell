@@ -23,6 +23,8 @@
 #include <signal.h>                 // signal, sigaction, kill, sigemptyset, sigaddset
 #include <dirent.h>                 // opendir, readdir, closedir
 #include "./libft/libft.h"
+#include <limits.h>                // PATH_MAX
+#include <errno.h> 				// errno, perror, strerror
 /*ext func like readline can be installed with 
 sudo apt-get update
 sudo apt-get install libreadline-dev
@@ -110,4 +112,7 @@ void echo(char *s);
 void pwd(void);
 void export(t_shell *shell, char **args);
 int	ft_exit(t_shell *shell, char **args);
+int	ft_cd(t_shell *shell, t_cmd *cmd);
+int ft_env(t_shell *shell);
+int	ft_unset(t_shell *shell, char **args);
 #endif
