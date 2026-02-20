@@ -6,7 +6,7 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/14 15:17:31 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/02/20 18:23:37 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,13 +102,18 @@ t_shell *init_shell(char **envp);
 void export_var(t_env **env, char *arg);
 void get_key_value(char *arg, char **key, char **value);
 void free_env(t_shell *shell);
-void echo(char *s);
-void pwd(void);
-void export(t_shell *shell, char **args);
+void free_1env(t_env *env);
+int ft_echo(char **args);
+int pwd(void);
+int export(t_shell *shell, char **args);
 int ft_exit(t_shell *shell, char **args);
 int ft_cd(t_shell *shell, t_cmd *cmd);
 int ft_env(t_shell *shell);
 int ft_unset(t_shell *shell, char **args);
+
+// execution functions
+int	exe_builtin(t_shell *shell, t_cmd *cmd);
+int	is_builtin(char *cmd);
 
 // parsing functions
 t_commnad *parse(t_token *tokens);
