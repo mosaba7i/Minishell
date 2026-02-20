@@ -70,8 +70,7 @@ typedef struct s_token
 typedef struct s_commnad
 {
 	char **arg_lst;
-	char *in_fd;
-	char *out_fd;
+	t_redir *redirs;
 	struct s_commnad *next;
 } t_commnad;
 
@@ -110,4 +109,10 @@ int ft_exit(t_shell *shell, char **args);
 int ft_cd(t_shell *shell, t_cmd *cmd);
 int ft_env(t_shell *shell);
 int ft_unset(t_shell *shell, char **args);
+
+// parsing functions
+t_commnad *parse(t_token *tokens);
+void handle_heredoc(t_commnad *cmds);
+t_token *tokenize(char *input);
+
 #endif
