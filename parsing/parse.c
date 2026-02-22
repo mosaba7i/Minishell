@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 t_commnad *new_command();
 int count_args(t_token *tokens);

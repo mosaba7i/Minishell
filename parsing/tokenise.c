@@ -1,9 +1,8 @@
 
-#include "minishell.h"
+#include "../minishell.h"
 
 // TODO: make sure you free before each exit
 
-int is_white_space(char c);
 t_token *new_token(void *content);
 int extract_word(char *input, int i);
 t_token *tokenize(char *input);

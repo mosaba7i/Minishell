@@ -22,6 +22,7 @@
 #include <sys/wait.h>		   // wait, waitpid, wait3, wait4
 #include <signal.h>			   // signal, sigaction, kill, sigemptyset, sigaddset
 #include <dirent.h>			   // opendir, readdir, closedir
+#include <stdarg.h>
 #include "./libft/libft.h"
 #include <limits.h> // PATH_MAX
 #include <errno.h>	// errno, perror, strerror
@@ -74,13 +75,6 @@ typedef struct s_commnad
 	struct s_commnad *next;
 } t_commnad;
 
-// typedef struct s_redir
-// {
-//     t_type type;
-//     char   *file;
-//     struct s_redir *next;
-// } t_redir;
-
 // new structs for env and shell (feb 14)
 typedef struct s_env
 {
@@ -112,12 +106,15 @@ int ft_env(t_shell *shell);
 int ft_unset(t_shell *shell, char **args);
 
 // execution functions
-int	exe_builtin(t_shell *shell, t_cmd *cmd);
-int	is_builtin(char *cmd);
+int exe_builtin(t_shell *shell, t_cmd *cmd);
+int is_builtin(char *cmd);
 
 // parsing functions
 t_commnad *parse(t_token *tokens);
 void handle_heredoc(t_commnad *cmds);
 t_token *tokenize(char *input);
+int is_white_space(char c);
+void assign_null(int num, ...);
+void check_env_expansion(t_commnad *cmds);
 
 #endif

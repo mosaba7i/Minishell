@@ -4,6 +4,9 @@
 void print_commands(t_commnad *head);
 void print_tokens(t_token *head);
 void debug_print_heredocs(t_redir *redir_list);
+void free_tokens(t_token *head);
+void free_commands(t_commnad *head);
+void free_all(t_token *tokens, t_commnad *cmds, char *line);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -18,15 +21,18 @@ int main(int argc, char **argv, char **envp)
 		// print_tokens(tokens);
 
 		t_commnad *cmds = parse(tokens);
-		// print_commands(cmds);
+		print_commands(cmds);
 
 		handle_heredoc(cmds);
 		// debug_print_heredocs(cmds->redirs);
+		check_env_expansion(cmds);
+		printf("after expansion: \n");
+		print_commands(cmds);
 		// execute(cmds);
 
-		// free_all(tokens, cmds, line);
-		free(inpt_line);
+		free_all(tokens, cmds, inpt_line);
 	}
+	return (0);
 }
 
 // TODO: remove before turn in
@@ -127,4 +133,48 @@ void debug_print_heredocs(t_redir *redir_list)
 
 	if (i == 0)
 		dprintf(2, "No heredocs found.\n");
+}
+
+void free_tokens(t_token *head)
+{
+	t_token *tmp;
+
+	while (head)
+	{
+		tmp = head;
+		head = head->next;
+		free(tmp->value);
+		free(tmp);
+	}
+}
+
+void free_commands(t_commnad *head)
+{
+	t_commnad *tmp;
+
+	while (head)
+	{
+		tmp = head;
+		head = head->next;
+		int i = 0;
+		while (tmp->arg_lst[i])
+			free(tmp->arg_lst[i++]);
+		free(tmp->arg_lst);
+		t_redir *redir_tmp;
+		while (tmp->redirs)
+		{
+			redir_tmp = tmp->redirs;
+			tmp->redirs = tmp->redirs->next;
+			free(redir_tmp->file);
+			free(redir_tmp);
+		}
+		free(tmp);
+	}
+}
+
+void free_all(t_token *tokens, t_commnad *cmds, char *line)
+{
+	free_tokens(tokens);
+	free_commands(cmds);
+	free(line);
 }
