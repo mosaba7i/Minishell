@@ -3,14 +3,13 @@
 int is_expandable(char *arg, char *var);
 int inside_single_qoutes(char *arg, char *var_pos);
 int is_var_between(char **start_quote, char **end_quote, char *var);
-void get_var(char *var_pos, char **var);
+void get_var(char *var_pos, char **var, t_shell *shell);
 void free_pointers(const int pointer_count, ...);
 void replace_var(char *new_arg, char *env_value, char *arg, char *var);
-void expand_var(char *var, char **arg);
+void expand_var(char *var, char **arg, t_shell *shell);
 int get_new_arg_len(char *arg, char *var, char *env_value);
-size_t ft_strlcat_t(char *dest, const char *src, size_t size);
 
-void check_env_expansion(t_commnad *cmds)
+void check_env_expansion(t_command *cmds, t_shell *shell)
 {
 	int i;
 	char *pos;
@@ -24,10 +23,10 @@ void check_env_expansion(t_commnad *cmds)
 			pos = ft_strchr(cmds->arg_lst[i], '$');
 			while (pos)
 			{
-				get_var(pos, &var);
+				get_var(pos, &var, shell);
 				if (is_expandable(cmds->arg_lst[i], var))
 				{
-					expand_var(var, &cmds->arg_lst[i]);
+					expand_var(var, &cmds->arg_lst[i], shell);
 					pos = ft_strchr(cmds->arg_lst[i], '$'); // since we overwritten and freed arg, pos point to garbage
 					continue;
 				}
@@ -39,7 +38,7 @@ void check_env_expansion(t_commnad *cmds)
 	}
 }
 
-void get_var(char *var_pos, char **var)
+void get_var(char *var_pos, char **var, t_shell *shell)
 {
 	int i;
 
@@ -48,6 +47,8 @@ void get_var(char *var_pos, char **var)
 	if (var_pos[1] == '?')
 	{
 		*var = ft_substr(var_pos, 0, 2);
+		if (!var)
+			print_error(shell, "minishell: malloc");
 		return;
 	}
 	while (var_pos[i])
@@ -57,6 +58,8 @@ void get_var(char *var_pos, char **var)
 		i++;
 	}
 	*var = ft_substr(var_pos, 0, i);
+	if (!var)
+		print_error(shell, "minishell: malloc");
 }
 
 int is_expandable(char *arg, char *var)
@@ -129,7 +132,7 @@ void assign_null(int num, ...)
 	va_end(arguments);
 }
 
-void expand_var(char *var, char **arg)
+void expand_var(char *var, char **arg, t_shell *shell)
 {
 	char *env_value;
 	int i;
@@ -144,7 +147,10 @@ void expand_var(char *var, char **arg)
 	new_len = get_new_arg_len(*arg, var, env_value);
 	new_arg = ft_calloc(new_len + 1, sizeof(char));
 	if (!new_arg)
-		exit(1); // TODO: combine errors into one function
+	{
+		free(var);
+		print_error(shell, "minishell: malloc");
+	}
 	replace_var(new_arg, env_value, *arg, var);
 	free_pointers(2, *arg, var);
 	*arg = new_arg;

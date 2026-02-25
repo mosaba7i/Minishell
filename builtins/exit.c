@@ -12,9 +12,9 @@
 
 #include "../minishell.h"
 
-int	ft_exit(t_shell *shell, char **args)
+int ft_exit(t_shell *shell, char **args)
 {
-	int	exit_code;
+	int exit_code;
 
 	printf("exit\n");
 	exit_code = shell->exit_status;
@@ -28,14 +28,15 @@ int	ft_exit(t_shell *shell, char **args)
 		exit_code = (unsigned int)ft_atoi(args[1]) % 256;
 	}
 	free_env(shell);
+	rl_clear_history();
 	exit(exit_code);
 	return (0);
 }
 
-//tetstingg
+// tetstingg
 /*int main(int ac, char **av)
 {
-    t_shell *shell = malloc(sizeof(t_shell));
-    shell->exit_status = 0;
-    ft_exit(shell, av);
+	t_shell *shell = malloc(sizeof(t_shell));
+	shell->exit_status = 0;
+	ft_exit(shell, av);
 }*/

@@ -5,13 +5,12 @@
 
 t_token *new_token(void *content);
 int extract_word(char *input, int i);
-t_token *tokenize(char *input);
 void append_token(t_token **head, t_token *new);
 void assign_token_types(t_token *head);
 int get_operator(char *input, int word);
 int is_operator_char(char c);
 
-t_token *tokenize(char *input)
+t_token *tokenize(char *input, t_shell *shell)
 {
 	int i = 0;
 	t_token *head;
@@ -26,10 +25,16 @@ t_token *tokenize(char *input)
 		if (!input[i])
 			break;
 		end_pos = extract_word(input, i);
+		if (end_pos == -1)
+			return (NULL);
 		current_token = new_token(ft_substr(input, i, end_pos - i));
+		if (!current_token)
+			print_error(shell, "minishell: malloc");
 		append_token(&head, current_token);
+		shell->ptrs->tokens = head; // update shell ptrs for freeing later
 		i = end_pos;
 	}
+	free(input);
 	assign_token_types(head);
 	return (head);
 }
@@ -47,7 +52,7 @@ int is_operator_char(char c)
 int extract_word(char *input, int i)
 {
 	char inside_qoute = 0;
-	int word;
+	size_t word;
 
 	word = i;
 	if (is_operator_char(input[word]))
@@ -66,10 +71,7 @@ int extract_word(char *input, int i)
 		word++;
 	}
 	if (inside_qoute)
-	{
-		printf("\nno end of qoute >:( \n"); // TODO: combine errors into one function
-		exit(1);
-	}
+		return (print_error_syntax("no end of quote", 0));
 	return (word);
 }
 
@@ -88,7 +90,7 @@ t_token *new_token(void *content)
 
 	list_node = malloc(sizeof(t_token));
 	if (!list_node)
-		exit(1);
+		return (NULL);
 	list_node->next = NULL;
 	list_node->value = content;
 	return (list_node);

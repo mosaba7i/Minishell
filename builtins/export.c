@@ -12,7 +12,7 @@
 
 #include "../minishell.h"
 
- void get_key_value(char *arg, char **key, char **value)
+void get_key_value(char *arg, char **key, char **value)
 {
     char *equal = ft_strchr(arg, '=');
     if (equal)
@@ -31,7 +31,7 @@ static void print_export_sorted(t_env *env)
     t_env *tmp;
     t_env *min;
     char *last;
-    
+
     last = "";
     while (1)
     {
@@ -54,13 +54,11 @@ static void print_export_sorted(t_env *env)
     }
 }
 
-
-
-int export(t_shell *shell, char **args)
+void export(t_shell *shell, char **args)
 {
     int i = 1;
     int ret;
-    
+
     if (!args[1])
     {
         print_export_sorted(shell->env);
@@ -74,7 +72,7 @@ int export(t_shell *shell, char **args)
     }
 }
 
-//for testing only
+// for testing only
 /*int main(int ac,char **av,char** envp)
 {
     //cc export.c export_utils.c ../init_shell.c -L ../libft -lft

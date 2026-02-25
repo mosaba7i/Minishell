@@ -1,38 +1,36 @@
 #include "../minishell.h"
 
-t_commnad *new_command();
+t_command *new_command();
 int count_args(t_token *tokens);
 int count_redir(t_token *tokens);
-void get_args(char **args, t_token *tokens);
+void get_args(char **args, t_token *tokens, t_shell *shell);
 void append_redir(t_redir **head, t_redir *new);
-void append_command(t_commnad **head, t_commnad *new);
-t_redir *get_redir(t_token *tokens);
+void append_command(t_command **head, t_command *new);
+t_redir *get_redir(t_token *tokens, t_shell *shell);
 int is_redirection(char *str, int num);
 int is_operator_num(int num);
-int check_syntax(t_token *tokens);
-void print_error(int error); // TODO: make a proper error handler
+int check_syntax(t_token *tokens, t_shell *shell);
 
-t_commnad *parse(t_token *tokens)
+t_command *parse(t_token *tokens, t_shell *shell)
 {
-	t_commnad *head;
-	t_commnad *current_cmd;
+	t_command *head;
+	t_command *current_cmd;
 	char **args;
 
-	check_syntax(tokens);
+	if (check_syntax(tokens, shell) == -1)
+		return (NULL);
 	head = NULL;
 	while (tokens)
 	{
-		current_cmd = new_command();
-		// int len = (count_args(tokens) + 1);
+		current_cmd = new_command(shell);
 		current_cmd->arg_lst = malloc((count_args(tokens) + 1) * sizeof(char *));
 		if (!current_cmd->arg_lst)
-			exit(1);
-		get_args(current_cmd->arg_lst, tokens);
-		// for (int i = 0; i < len; i++)
-		// 	printf("->%s \n", current_cmd->arg_lst[i]);
-		current_cmd->redirs = get_redir(tokens);
+			print_error(shell, "minishell: malloc");
+		get_args(current_cmd->arg_lst, tokens, shell);
+		current_cmd->redirs = get_redir(tokens, shell);
 		current_cmd->next = NULL;
 		append_command(&head, current_cmd);
+		shell->ptrs->commands = head; // update shell ptrs for freeing later
 		while (tokens && tokens->type != PIPE)
 			tokens = tokens->next;
 		if (tokens)
@@ -41,54 +39,52 @@ t_commnad *parse(t_token *tokens)
 	return (head);
 }
 
-int check_syntax(t_token *tokens)
+int check_syntax(t_token *tokens, t_shell *shell)
 {
-	int error;
 	t_token *prev;
 
 	if (!tokens)
 		return (0);
-	error = 0;
 	prev = tokens;
 	tokens = tokens->next;
 	if (prev->type == PIPE)
-		error = 1;
+		return (print_error_syntax(NULL, "|"));
 	while (tokens)
 	{
-		if (is_operator_num(prev->type) && is_operator_num(tokens->type))
-			error = 2;
-		if (error)
-			break;
+		if (is_redirection(NULL, prev->type) && is_operator_num(tokens->type))
+			return (print_error_syntax(NULL, tokens->value));
+		if (prev->type == PIPE && tokens->type == PIPE)
+			return (print_error_syntax(NULL, "|"));
 		prev = tokens;
 		tokens = tokens->next;
 	}
 	if (!tokens && is_operator_num(prev->type))
-		error = 1;
-	if (error)
-		print_error(error);
+		return (print_error_syntax(NULL, prev->value));
 	return (0);
 }
 
-void print_error(int error)
+int print_error_syntax(char *msg, char *str)
 {
-	if (error == 1)
-		printf("operator at improper place\n");
-	else if (error == 2)
-		printf("2 operators suceeding each other\n");
-	else if (error = 3)
-		printf("no file given to redirection\n");
-	exit(error);
+	write(2, "minishell: ", 11);
+	if (msg)
+		write(2, msg, ft_strlen(msg));
+	else
+	{
+		write(2, "syntax error near unexpected token `", 37);
+		write(2, str, ft_strlen(str));
+		write(2, "'", 1);
+	}
+	write(2, "\n", 1);
+	return (-1);
 }
 
-t_commnad *new_command()
+t_command *new_command(t_shell *shell)
 {
-	t_commnad *list_node;
+	t_command *list_node;
 
-	list_node = malloc(sizeof(t_commnad));
+	list_node = malloc(sizeof(t_command));
 	if (!list_node)
-		exit(1); // TODO: handle print error
-	if (!list_node)
-		return (NULL);
+		print_error(shell, "minishell: malloc");
 	list_node->next = NULL;
 	list_node->arg_lst = NULL;
 	list_node->redirs = NULL;
@@ -113,7 +109,7 @@ int count_args(t_token *tokens)
 	return (count);
 }
 
-void get_args(char **args, t_token *tokens)
+void get_args(char **args, t_token *tokens, t_shell *shell)
 {
 	while (tokens && tokens->type != PIPE)
 	{
@@ -122,13 +118,16 @@ void get_args(char **args, t_token *tokens)
 			tokens = tokens->next->next;
 			continue;
 		}
-		*args++ = ft_strdup(tokens->value);
+		*args = ft_strdup(tokens->value);
+		if (!*args)
+			print_error(shell, "minishell: malloc");
 		tokens = tokens->next;
+		*args++;
 	}
 	*args = NULL;
 }
 
-t_redir *get_redir(t_token *tokens)
+t_redir *get_redir(t_token *tokens, t_shell *shell)
 {
 	t_redir *current;
 	t_redir *head;
@@ -140,9 +139,11 @@ t_redir *get_redir(t_token *tokens)
 		{
 			current = malloc(sizeof(t_redir));
 			if (!current)
-				exit(1); // TODO: print error and free
+				print_error(shell, "minishell: malloc");
 			current->type = tokens->type;
-			current->file = tokens->next->value;
+			current->file = ft_strdup(tokens->next->value);
+			if (!current->file)
+				print_error(shell, "minishell: malloc");
 			current->next = NULL;
 			append_redir(&head, current);
 			tokens = tokens->next->next;
@@ -168,9 +169,9 @@ void append_redir(t_redir **head, t_redir *new)
 	last->next = new;
 }
 
-void append_command(t_commnad **head, t_commnad *new)
+void append_command(t_command **head, t_command *new)
 {
-	t_commnad *last;
+	t_command *last;
 
 	if (!(*head))
 	{

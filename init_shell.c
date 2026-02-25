@@ -14,39 +14,46 @@
 
 t_shell *init_shell(char **envp)
 {
-    t_shell *shell = malloc(sizeof(t_shell));
-    if (!shell)
-        return NULL;
-
-    shell->env = NULL;
-    shell->exit_status = 0;
-
-    int i = 0;
-    while (envp[i])
-    {
-        export_var(&shell->env, envp[i]);
-        i++;
-    }
-    return shell;
+	t_shell *shell = malloc(sizeof(t_shell));
+	if (!shell)
+		return NULL;
+	shell->env = NULL;
+	shell->exit_status = 0;
+	shell->ptrs = malloc(sizeof(t_ptrs)); // keep track of tokens and commands for easy freeing later
+	if (!shell->ptrs)
+	{
+		free(shell);
+		return NULL;
+	}
+	shell->ptrs->tokens = NULL;
+	shell->ptrs->commands = NULL;
+	int i = 0;
+	while (envp[i])
+	{
+		export_var(&shell->env, envp[i]);
+		i++;
+	}
+	return shell;
 }
 
 void free_env(t_shell *shell)
 {
-    t_env *tmp;
-    while (shell->env)
-    {
-        tmp = shell->env;
-        shell->env = shell->env->next;
-        free(tmp->key);
-        free(tmp->value);
-        free(tmp);
-    }
-    free(shell);
+	t_env *tmp;
+	while (shell->env)
+	{
+		tmp = shell->env;
+		shell->env = shell->env->next;
+		free(tmp->key);
+		free(tmp->value);
+		free(tmp);
+	}
+	free(shell->ptrs);
+	free(shell);
 }
 
 void free_1env(t_env *env)
 {
-    free(env->key);
-    free(env->value);
-    free(env);
+	free(env->key);
+	free(env->value);
+	free(env);
 }

@@ -31,7 +31,7 @@ static t_env *find_env(t_env *env, char *key)
 {
     while (env)
     {
-        if (ft_strncmp(env->key, key,ft_strlen(key)) == 0)
+        if (ft_strncmp(env->key, key, ft_strlen(key)) == 0)
             return env;
         env = env->next;
     }
@@ -83,7 +83,7 @@ int export_var(t_env **env, char *arg)
     if (existing && equal)
     {
         free(existing->value);
-        existing->value = ft_strdup(value);
+        existing->value = ft_strdup(value); // TODO: check malloc fail
     }
     else if (!existing)
         add_env_back(env, create_env_node(key, value));
