@@ -108,7 +108,9 @@ int ft_unset(t_shell *shell, char **args);
 // execution functions
 int exe_builtin(t_shell *shell, t_cmd *cmd);
 int is_builtin(char *cmd);
-
+char **env_to_array(t_env *env);
+void	free_strs(char **arr);
+char	*get_cmd_path(t_shell *shell, char *cmd);
 // parsing functions
 t_commnad *parse(t_token *tokens);
 void handle_heredoc(t_commnad *cmds);
