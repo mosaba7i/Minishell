@@ -14,14 +14,21 @@
 
 static void	safe_close(int *fd_to_close)
 {
-	// if fd is validd close it and reset it to -1
+	if (*fd_to_close != -1)
+	{
+		close(*fd_to_close);
+		*fd_to_close = -1;
+	}
 }
 
 static int	redirect_fd(int from_fd, int to_fd)
 {
-	//  return error if from_fd is invalid
-	//     if from_fd == to_fd, do nothing
-	//  otherwise call dup2(from_fd, to_fd)
+	if (from_fd == -1)
+		return (-1);
+	if (from_fd == to_fd)
+		return (0);
+	if (dup2(from_fd, to_fd) == -1)
+		return (-1);
 	return (0);
 }
 
@@ -29,7 +36,7 @@ static void	wait_for_leftovers(void)
 {
 	int	status;
 
-	// keep calling wait() until there are no children left
+	while (wait(&status) > 0);
 }
 
 static int	wait_for_everything(pid_t last_child)
@@ -46,9 +53,14 @@ static int	wait_for_everything(pid_t last_child)
 static void	child_exit_cleanly(int input_fd, int output_fd,
 	char *full_path, char **env_list, int exit_code)
 {
-	// close input and output fdss if needed ofc 
-	// free   path and env array if allocated
-	//   exit with exit_code
+	if (input_fd != -1 && input_fd != STDIN_FILENO)
+		close(input_fd);
+	if (output_fd != -1 && output_fd != STDOUT_FILENO)
+		close(output_fd);
+	if (full_path)
+		free(full_path);
+	if (env_list)
+		free_strs(env_list);
 	exit(exit_code);
 }
 
@@ -69,18 +81,50 @@ static void	run_command_in_child(t_shell *shell, t_cmd *command,
 
 static int	restore_stdio(int saved_stdin, int saved_stdout)
 {
-	// restore original stdin and stdout with dup2
-	// close saved   copies
-	return (0);
+	int	restore_failed;
+
+	restore_failed = 0;
+	if (saved_stdin != -1)
+	{
+		if (dup2(saved_stdin, STDIN_FILENO) == -1)
+			restore_failed = 1;
+		close(saved_stdin);
+	}
+	if (saved_stdout != -1)
+	{
+		if (dup2(saved_stdout, STDOUT_FILENO) == -1)
+			restore_failed = 1;
+		close(saved_stdout);
+	}
+	return (restore_failed);
 }
 
 static int	run_builtin_in_parent(t_shell *shell, t_cmd *command)
 {
-	// save  stdin stdout
-	// apply redirs
-	// run builtin  in parent
-	// restore stdin and stdout
-	return (0);
+	int	saved_stdin;
+	int	saved_stdout;
+	int	builtin_status;
+
+	saved_stdin = dup(STDIN_FILENO);
+	saved_stdout = dup(STDOUT_FILENO);
+	if (saved_stdin == -1 || saved_stdout == -1)
+	{
+		perror("minishell: dup");
+		safe_close(&saved_stdin);
+		safe_close(&saved_stdout);
+		return (1);
+	}
+	builtin_status = 0;
+	if (apply_redirs(command->redirs) == -1)
+		builtin_status = 1;
+	else
+		builtin_status = exe_builtin(shell, command->args);
+	if (restore_stdio(saved_stdin, saved_stdout))
+	{
+		perror("minishell: dup2");
+		return (1);
+	}
+	return (builtin_status);
 }
 
 int	execute(t_shell *shell, t_cmd *command_list)
