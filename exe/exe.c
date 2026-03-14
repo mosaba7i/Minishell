@@ -45,8 +45,22 @@ static int	wait_for_everything(pid_t last_child)
 	pid_t	finished_pid;
 	int		final_status;
 
-	//    waiting   for all children
-	// save exit status only for the lats child in the pipeline
+	final_status = 0;
+	finished_pid = wait(&status);
+	while (finished_pid > 0)
+	{
+		if (finished_pid == last_child)
+		{
+			if (WIFSIGNALED(status))
+				final_status = 128 + WTERMSIG(status);
+			else if (WIFEXITED(status))
+				final_status = WEXITSTATUS(status);
+			else
+				final_status = 1;
+		}
+		finished_pid = wait(&status);
+	}
+	return (final_status);
 	return (final_status);
 }
 
@@ -67,16 +81,51 @@ static void	child_exit_cleanly(int input_fd, int output_fd,
 static void	run_command_in_child(t_shell *shell, t_cmd *command,
 	int input_fd, int output_fd)
 {
-	// initt child signals
-	// dup input_fd to stdin if needed
-	// dup output_fd to stdout if needed
-	// apply redirs
-	// if empty command -> exit(0)
-	// if builtin -> run builtin and exit with its return value
-	// resolve da full exec path
-	// convert env list to envp array
-	// call execve
-	// on error cleanup and exit with a good written good 
+	char	*full_path;
+	char	**env_list;
+
+	full_path = NULL;
+	env_list = NULL;
+	initsig_child();
+	if (redirect_fd(input_fd, STDIN_FILENO) == -1)
+	{
+		perror("minishell: dup2");
+		child_exit_cleanly(input_fd, output_fd, full_path, env_list, 1);
+	}
+	if (redirect_fd(output_fd, STDOUT_FILENO) == -1)
+	{
+		perror("minishell: dup2");
+		child_exit_cleanly(input_fd, output_fd, full_path, env_list, 1);
+	}
+	if (input_fd != -1 && input_fd != STDIN_FILENO)
+		close(input_fd);
+	if (output_fd != -1 && output_fd != STDOUT_FILENO)
+		close(output_fd);
+	if (apply_redirs(command->redirs) == -1)
+		child_exit_cleanly(-1, -1, full_path, env_list, 1);
+	if (!command->args || !command->args[0])
+		child_exit_cleanly(-1, -1, full_path, env_list, 0);
+	if (is_builtin(command->args[0]))
+		child_exit_cleanly(-1, -1, full_path, env_list,
+			exe_builtin(shell, command->args));
+	full_path = get_cmd_path(shell, command->args[0]);
+	if (!full_path)
+	{
+		write(2, "minishell: ", 11);
+		perror(command->args[0]);
+		child_exit_cleanly(-1, -1, full_path, env_list, 127);
+	}
+	env_list = env_to_array(shell->env);
+	if (!env_list)
+	{
+		perror("minishell: env_to_array");
+		child_exit_cleanly(-1, -1, full_path, env_list, 1);
+	}
+	execve(full_path, command->args, env_list);
+	perror(command->args[0]);
+	if (errno == EACCES)
+		child_exit_cleanly(-1, -1, full_path, env_list, 126);
+	child_exit_cleanly(-1, -1, full_path, env_list, 126);
 }
 
 static int	restore_stdio(int saved_stdin, int saved_stdout)
@@ -139,9 +188,8 @@ int	execute(t_shell *shell, t_cmd *command_list)
 		return (0);
 	if (!command_list->next && command_list->args
 		&& is_builtin(command_list->args[0]))
-	{
-		// run the single builtin in parent
-	}
+		return (shell->exit_status = run_builtin_in_parent(shell,
+				command_list));
 	last_input_fd = -1;
 	last_child = -1;
 	started_any_child = 0;
@@ -149,13 +197,41 @@ int	execute(t_shell *shell, t_cmd *command_list)
 	{
 		pipe_fds[0] = -1;
 		pipe_fds[1] = -1;
-		// if there is a next cmd makee a pipe
-		// fork a  child
-		// child: run current command with proper input and output
-		// parent  close unused fds and move to next command
+		if (command_list->next && pipe(pipe_fds) == -1)
+		{
+			perror("minishell: pipe");
+			safe_close(&last_input_fd);
+			if (started_any_child)
+				wait_for_leftovers();
+			shell->exit_status = 1;
+			return (shell->exit_status);
+		}
+		child_pid = fork();
+		if (child_pid == -1)
+		{
+			perror("minishell: fork");
+			safe_close(&last_input_fd);
+			safe_close(&pipe_fds[0]);
+			safe_close(&pipe_fds[1]);
+			if (started_any_child)
+				wait_for_leftovers();
+			shell->exit_status = 1;
+			return (shell->exit_status);
+		}
+		if (child_pid == 0)
+		{
+			safe_close(&pipe_fds[0]);
+			run_command_in_child(shell, command_list, last_input_fd,
+				pipe_fds[1]);
+		}
+		started_any_child = 1;
+		safe_close(&last_input_fd);
+		safe_close(&pipe_fds[1]);
+		last_input_fd = pipe_fds[0];
+		last_child = child_pid;
 		command_list = command_list->next;
 	}
-	// close any leftover  fd
-	// wait for children
+	safe_close(&last_input_fd);
+	shell->exit_status = wait_for_everything(last_child);
 	return (shell->exit_status);
 }
