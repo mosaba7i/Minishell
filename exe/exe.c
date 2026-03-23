@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   exe.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 00:00:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/17 13:58:11 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/23 21:21:29 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static void	safe_close(int *fd_to_close)
+static void safe_close(int *fd_to_close)
 {
 	if (*fd_to_close != -1)
 	{
@@ -21,7 +21,7 @@ static void	safe_close(int *fd_to_close)
 	}
 }
 
-static int	redirect_fd(int from_fd, int to_fd)
+static int redirect_fd(int from_fd, int to_fd)
 {
 	if (from_fd == -1)
 		return (-1);
@@ -32,18 +32,19 @@ static int	redirect_fd(int from_fd, int to_fd)
 	return (0);
 }
 
-static void	wait_for_leftovers(void)
+static void wait_for_leftovers(void)
 {
-	int	status;
+	int status;
 
-	while (wait(&status) > 0);
+	while (wait(&status) > 0)
+		;
 }
 
-static int	wait_for_everything(pid_t last_child)
+static int wait_for_everything(pid_t last_child)
 {
-	int		status;
-	pid_t	finished_pid;
-	int		final_status;
+	int status;
+	pid_t finished_pid;
+	int final_status;
 
 	final_status = 0;
 	finished_pid = wait(&status);
@@ -64,8 +65,8 @@ static int	wait_for_everything(pid_t last_child)
 	return (final_status);
 }
 
-static void	child_exit_cleanly(int input_fd, int output_fd,
-	char *full_path, char **env_list, int exit_code)
+static void child_exit_cleanly(int input_fd, int output_fd,
+							   char *full_path, char **env_list, int exit_code)
 {
 	if (input_fd != -1 && input_fd != STDIN_FILENO)
 		close(input_fd);
@@ -78,11 +79,11 @@ static void	child_exit_cleanly(int input_fd, int output_fd,
 	exit(exit_code);
 }
 
-static void	run_command_in_child(t_shell *shell, t_command *command,
-	int input_fd, int output_fd)
+static void run_command_in_child(t_shell *shell, t_command *command,
+								 int input_fd, int output_fd)
 {
-	char	*full_path;
-	char	**env_list;
+	char *full_path;
+	char **env_list;
 
 	full_path = NULL;
 	env_list = NULL;
@@ -103,7 +104,7 @@ static void	run_command_in_child(t_shell *shell, t_command *command,
 		child_exit_cleanly(-1, -1, full_path, env_list, 0);
 	if (is_builtin(command->arg_lst[0]))
 		child_exit_cleanly(-1, -1, full_path, env_list,
-			exe_builtin(shell, command));
+						   exe_builtin(shell, command));
 	full_path = get_cmd_path(shell, command->arg_lst[0]);
 	if (!full_path)
 	{
@@ -124,9 +125,9 @@ static void	run_command_in_child(t_shell *shell, t_command *command,
 	child_exit_cleanly(-1, -1, full_path, env_list, 126);
 }
 
-static int	restore_stdio(int saved_stdin, int saved_stdout)
+static int restore_stdio(int saved_stdin, int saved_stdout)
 {
-	int	restore_failed;
+	int restore_failed;
 
 	restore_failed = 0;
 	if (saved_stdin != -1)
@@ -144,11 +145,11 @@ static int	restore_stdio(int saved_stdin, int saved_stdout)
 	return (restore_failed);
 }
 
-static int	run_builtin_in_parent(t_shell *shell, t_command *command)
+static int run_builtin_in_parent(t_shell *shell, t_command *command)
 {
-	int	saved_stdin;
-	int	saved_stdout;
-	int	builtin_status;
+	int saved_stdin;
+	int saved_stdout;
+	int builtin_status;
 
 	saved_stdin = dup(STDIN_FILENO);
 	saved_stdout = dup(STDOUT_FILENO);
@@ -172,20 +173,19 @@ static int	run_builtin_in_parent(t_shell *shell, t_command *command)
 	return (builtin_status);
 }
 
-int	execute(t_shell *shell, t_command *command_list)
+int execute(t_shell *shell, t_command *command_list)
 {
-	int		last_input_fd;
-	int		pipe_fds[2];
-	pid_t	child_pid;
-	pid_t	last_child;
-	int		started_any_child;
+	int last_input_fd;
+	int pipe_fds[2];
+	pid_t child_pid;
+	pid_t last_child;
+	int started_any_child;
 
 	if (!command_list)
 		return (0);
-	if (!command_list->next && command_list->arg_lst
-		&& is_builtin(command_list->arg_lst[0]))
+	if (!command_list->next && command_list->arg_lst && is_builtin(command_list->arg_lst[0]))
 		return (shell->exit_status = run_builtin_in_parent(shell,
-				command_list));
+														   command_list));
 	last_input_fd = -1;
 	last_child = -1;
 	started_any_child = 0;
@@ -218,7 +218,7 @@ int	execute(t_shell *shell, t_command *command_list)
 		{
 			safe_close(&pipe_fds[0]);
 			run_command_in_child(shell, command_list, last_input_fd,
-				pipe_fds[1]);
+								 pipe_fds[1]);
 		}
 		started_any_child = 1;
 		safe_close(&last_input_fd);
