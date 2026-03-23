@@ -139,8 +139,7 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	int new_len;
 
 	if (!ft_strncmp(var, "$?", 3))
-		// TODO: get exit status after execution
-		env_value = ft_itoa(999);
+		env_value = ft_itoa(shell->exit_status);
 	else
 		env_value = getenv(var + 1);
 	new_len = get_new_arg_len(*arg, var, env_value);
