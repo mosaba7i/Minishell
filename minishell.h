@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/20 18:23:37 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/19 17:27:36 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,23 +109,25 @@ void free_env(t_shell *shell);
 void free_1env(t_env *env);
 int ft_echo(char **args);
 int pwd(void);
-void export(t_shell *shell, char **args);
+int export(t_shell *shell, char **args);
 int ft_exit(t_shell *shell, char **args);
-int ft_cd(t_shell *shell, t_cmd *cmd);
+int ft_cd(t_shell *shell, t_command *cmd);
 int ft_env(t_shell *shell);
 int ft_unset(t_shell *shell, char **args);
 
 // execution functions
-int exe_builtin(t_shell *shell, t_cmd *cmd);
+int execute(t_shell *shell, t_command *command_list);
+int exe_builtin(t_shell *shell, t_command *cmd);
 int is_builtin(char *cmd);
 char **env_to_array(t_env *env);
-void	free_strs(char **arr);
-char	*get_cmd_path(t_shell *shell, char *cmd);
-int	do_redirs(t_redir *r);
-//signals functions
-void	initsig_child(void);
-void	initsig_heredoc(void);
-void	initsig_prompt(void);
+void free_strs(char **arr);
+char *get_cmd_path(t_shell *shell, char *cmd);
+int do_redirs(t_redir *r);
+int apply_redirs(t_redir *r);
+// signals functions
+void initsig_child(void);
+void initsig_heredoc(void);
+void initsig_prompt(void);
 // parsing functions
 t_command *parse(t_token *tokens, t_shell *shell);
 void handle_heredoc(t_command *cmds, t_shell *shell);
@@ -134,7 +136,7 @@ int is_white_space(char c);
 void assign_null(int num, ...);
 void check_env_expansion(t_command *cmds, t_shell *shell);
 void handle_quotes(t_command *cmds, t_shell *shell);
-void print_error(t_shell *shell, const char *msg);
+void print_error_free(t_shell *shell, const char *msg);
 int print_error_syntax(char *msg, char *str);
 void free_tokens(t_token *head);
 void *free_all(t_token *tokens, t_command *cmds);

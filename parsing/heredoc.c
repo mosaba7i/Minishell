@@ -6,7 +6,6 @@ void read_heredoc_input(t_redir *redirs, int fd[2]);
 void handle_heredoc(t_command *cmds, t_shell *shell)
 {
 	int fd[2];
-	char *line;
 	t_redir *redirs;
 
 	while (cmds)
@@ -18,7 +17,7 @@ void handle_heredoc(t_command *cmds, t_shell *shell)
 			{
 				printf("Handling heredoc for delimiter: [%s]\n", redirs->file); // TODO: remove before turn in
 				if (pipe(fd) == -1)
-					print_error(shell, "minishell: pipe");
+					print_error_free(shell, "minishell: pipe");
 				read_heredoc_input(redirs, fd);
 				close(fd[1]);
 				redirs->fd = fd[0];

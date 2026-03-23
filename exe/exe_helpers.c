@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   exe_helpers.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 17:38:51 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/20 18:13:02 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/19 17:31:02 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	is_builtin(char *cmd)
+int is_builtin(char *cmd)
 {
 	if (!cmd)
 		return (0);
@@ -33,24 +33,24 @@ int	is_builtin(char *cmd)
 	return (0);
 }
 
-int	exe_builtin(t_shell *shell, t_cmd *cmd)
+int exe_builtin(t_shell *shell, t_command *cmd)
 {
-	int	ret;
+	int ret;
 
 	ret = 0;
-	if (ft_strncmp(cmd->args[0], "echo", 5) == 0)
-		ret = ft_echo(cmd->args);
-	else if (ft_strncmp(cmd->args[0], "cd", 3) == 0)
-		ret = ft_cd(shell, cmd->args);
-	else if (ft_strncmp(cmd->args[0], "pwd", 4) == 0)
+	if (ft_strncmp(cmd->arg_lst[0], "echo", 5) == 0)
+		ret = ft_echo(cmd->arg_lst);
+	else if (ft_strncmp(cmd->arg_lst[0], "cd", 3) == 0)
+		ret = ft_cd(shell, cmd);
+	else if (ft_strncmp(cmd->arg_lst[0], "pwd", 4) == 0)
 		ret = pwd();
-	else if (ft_strncmp(cmd->args[0], "export", 7) == 0)
-		ret = export(shell, cmd->args);
-	else if (ft_strncmp(cmd->args[0], "unset", 6) == 0)
-		ret = ft_unset(shell, cmd->args);
-	else if (ft_strncmp(cmd->args[0], "env", 4) == 0)
+	else if (ft_strncmp(cmd->arg_lst[0], "export", 7) == 0)
+		ret = export(shell, cmd->arg_lst);
+	else if (ft_strncmp(cmd->arg_lst[0], "unset", 6) == 0)
+		ret = ft_unset(shell, cmd->arg_lst);
+	else if (ft_strncmp(cmd->arg_lst[0], "env", 4) == 0)
 		ret = ft_env(shell);
-	else if (ft_strncmp(cmd->args[0], "exit", 5) == 0)
-		ret = ft_exit(shell, cmd->args);
+	else if (ft_strncmp(cmd->arg_lst[0], "exit", 5) == 0)
+		ret = ft_exit(shell, cmd->arg_lst);
 	return (ret);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 14:51:44 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/20 18:09:42 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/19 17:29:01 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,15 +54,14 @@ static void print_export_sorted(t_env *env)
     }
 }
 
-void export(t_shell *shell, char **args)
+int export(t_shell *shell, char **args)
 {
     int i = 1;
-    int ret;
 
     if (!args[1])
     {
         print_export_sorted(shell->env);
-        return;
+        return (0);
     }
 
     while (args[i])
@@ -70,6 +69,7 @@ void export(t_shell *shell, char **args)
         export_var(&shell->env, args[i]);
         i++;
     }
+    return (0);
 }
 
 // for testing only

@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   redir.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 00:00:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/26 04:43:51 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/19 17:34:23 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static int	open_inputfile(char *file)
+static int open_inputfile(char *file)
 {
-	int	fd;
+	int fd;
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1)
@@ -22,9 +22,9 @@ static int	open_inputfile(char *file)
 	return (fd);
 }
 
-static int	open_outputfile(char *file, int append)
+static int open_outputfile(char *file, int append)
 {
-	int	fd;
+	int fd;
 
 	if (append)
 		fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0644);
@@ -35,9 +35,9 @@ static int	open_outputfile(char *file, int append)
 	return (fd);
 }
 
-int	do_redirs(t_redir *r)
+int do_redirs(t_redir *r)
 {
-	int	fd;
+	int fd;
 
 	while (r)
 	{
@@ -62,4 +62,9 @@ int	do_redirs(t_redir *r)
 		r = r->next;
 	}
 	return (0);
+}
+
+int apply_redirs(t_redir *r)
+{
+	return (do_redirs(r));
 }

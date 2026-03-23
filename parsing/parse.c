@@ -9,15 +9,14 @@ void append_command(t_command **head, t_command *new);
 t_redir *get_redir(t_token *tokens, t_shell *shell);
 int is_redirection(char *str, int num);
 int is_operator_num(int num);
-int check_syntax(t_token *tokens, t_shell *shell);
+int check_syntax(t_token *tokens);
 
 t_command *parse(t_token *tokens, t_shell *shell)
 {
 	t_command *head;
 	t_command *current_cmd;
-	char **args;
 
-	if (check_syntax(tokens, shell) == -1)
+	if (check_syntax(tokens) == -1)
 		return (NULL);
 	head = NULL;
 	while (tokens)
@@ -25,7 +24,7 @@ t_command *parse(t_token *tokens, t_shell *shell)
 		current_cmd = new_command(shell);
 		current_cmd->arg_lst = malloc((count_args(tokens) + 1) * sizeof(char *));
 		if (!current_cmd->arg_lst)
-			print_error(shell, "minishell: malloc");
+			print_error_free(shell, "minishell: malloc");
 		get_args(current_cmd->arg_lst, tokens, shell);
 		current_cmd->redirs = get_redir(tokens, shell);
 		current_cmd->next = NULL;
@@ -39,7 +38,7 @@ t_command *parse(t_token *tokens, t_shell *shell)
 	return (head);
 }
 
-int check_syntax(t_token *tokens, t_shell *shell)
+int check_syntax(t_token *tokens)
 {
 	t_token *prev;
 
@@ -75,7 +74,7 @@ int print_error_syntax(char *msg, char *str)
 		write(2, "'", 1);
 	}
 	write(2, "\n", 1);
-	return (-1);
+	return (-1); // TODO: check exit code
 }
 
 t_command *new_command(t_shell *shell)
@@ -84,7 +83,7 @@ t_command *new_command(t_shell *shell)
 
 	list_node = malloc(sizeof(t_command));
 	if (!list_node)
-		print_error(shell, "minishell: malloc");
+		print_error_free(shell, "minishell: malloc");
 	list_node->next = NULL;
 	list_node->arg_lst = NULL;
 	list_node->redirs = NULL;
@@ -120,9 +119,9 @@ void get_args(char **args, t_token *tokens, t_shell *shell)
 		}
 		*args = ft_strdup(tokens->value);
 		if (!*args)
-			print_error(shell, "minishell: malloc");
+			print_error_free(shell, "minishell: malloc");
 		tokens = tokens->next;
-		*args++;
+		(*args)++;
 	}
 	*args = NULL;
 }
@@ -139,11 +138,11 @@ t_redir *get_redir(t_token *tokens, t_shell *shell)
 		{
 			current = malloc(sizeof(t_redir));
 			if (!current)
-				print_error(shell, "minishell: malloc");
+				print_error_free(shell, "minishell: malloc");
 			current->type = tokens->type;
 			current->file = ft_strdup(tokens->next->value);
 			if (!current->file)
-				print_error(shell, "minishell: malloc");
+				print_error_free(shell, "minishell: malloc");
 			current->next = NULL;
 			append_redir(&head, current);
 			tokens = tokens->next->next;

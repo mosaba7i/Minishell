@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 15:38:10 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/18 14:42:12 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/19 16:47:37 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,12 +37,12 @@ static t_env *find_env(t_env *env, char *key)
     return (NULL);
 }
 
-static void    set_env_value(t_shell *shell, char *key, char *value)
+static void set_env_value(t_shell *shell, char *key, char *value)
 {
-    t_env   *node;
+    t_env *node;
 
     if (!key || !shell)
-        return ;
+        return;
     node = find_env(shell->env, key);
     if (node)
     {
@@ -56,7 +56,7 @@ static void    set_env_value(t_shell *shell, char *key, char *value)
     {
         t_env *new = malloc(sizeof(t_env));
         if (!new)
-            return ;
+            return;
         new->key = ft_strdup(key);
         if (value)
             new->value = ft_strdup(value);
@@ -81,25 +81,24 @@ static char *get_env_value(t_shell *shell, char *key)
     return (NULL);
 }
 
-int	ft_cd(t_shell *shell, t_cmd *cmd)
+int ft_cd(t_shell *shell, t_command *cmd)
 {
-	char	*path;
-	char	cwd[PATH_MAX]; //this header has a max len of char for paths which is 4096 in linux..
+    char *path;
+    char cwd[PATH_MAX]; // this header has a max len of char for paths which is 4096 in linux..
 
-	if (!cmd->args[1])
-		path = get_env_value(shell, "HOME");
-	else
-		path = cmd->args[1];
-	if (chdir(path) != 0)
-	{
-		print_error("cd", strerror(errno), 1);
-		return (1);
-	}
-	getcwd(cwd, sizeof(cwd));
-	set_env_value(shell, "PWD", cwd);
-	return (0);
+    if (!cmd->arg_lst[1])
+        path = get_env_value(shell, "HOME");
+    else
+        path = cmd->arg_lst[1];
+    if (chdir(path) != 0)
+    {
+        print_error("cd", strerror(errno), 1);
+        return (1);
+    }
+    getcwd(cwd, sizeof(cwd));
+    set_env_value(shell, "PWD", cwd);
+    return (0);
 }
-
 
 /*
 int main(int ac, char **av, char **envp)

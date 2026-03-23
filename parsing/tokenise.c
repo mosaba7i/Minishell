@@ -12,12 +12,13 @@ int is_operator_char(char c);
 
 t_token *tokenize(char *input, t_shell *shell)
 {
-	int i = 0;
+	int i;
 	t_token *head;
 	t_token *current_token;
 	int end_pos;
 
 	head = NULL;
+	i = 0;
 	while (input[i])
 	{
 		while (is_white_space(input[i]))
@@ -29,12 +30,11 @@ t_token *tokenize(char *input, t_shell *shell)
 			return (NULL);
 		current_token = new_token(ft_substr(input, i, end_pos - i));
 		if (!current_token)
-			print_error(shell, "minishell: malloc");
+			print_error_free(shell, "minishell: malloc");
 		append_token(&head, current_token);
 		shell->ptrs->tokens = head; // update shell ptrs for freeing later
 		i = end_pos;
 	}
-	free(input);
 	assign_token_types(head);
 	return (head);
 }

@@ -21,7 +21,7 @@ void handle_quotes(t_command *cmds, t_shell *shell)
 			{
 				quote_pos = ft_calloc((count_quotes(cmds->arg_lst[i]) + 1), sizeof(char *));
 				if (!quote_pos)
-					print_error(shell, "minishell: malloc");
+					print_error_free(shell, "minishell: malloc");
 				get_quotes(&cmds->arg_lst[i], quote_pos);
 				new_arg = remove_quotes(&cmds->arg_lst[i], quote_pos, shell);
 				cmds->arg_lst[i] = new_arg;
@@ -93,7 +93,7 @@ char *remove_quotes(char **arg, char **quote_pos, t_shell *shell)
 	if (!new_arg)
 	{
 		free(quote_pos);
-		print_error(shell, "minishell: malloc");
+		print_error_free(shell, "minishell: malloc");
 	}
 	i = 0;
 	j = 0;

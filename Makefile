@@ -1,0 +1,37 @@
+NAME	= minishell
+
+CC		= cc
+CFLAGS	= -Wall -Wextra -Werror
+
+LIBFT_DIR	= libft
+LIBFT		= $(LIBFT_DIR)/libft.a
+
+SRCS	= main.c init_shell.c \
+	parsing/tokenise.c parsing/parse.c parsing/heredoc.c parsing/expand.c parsing/remove_quotes.c \
+	builtins/echo.c builtins/cd.c builtins/pwd.c builtins/env.c \
+	builtins/export.c builtins/export_utils.c builtins/unset.c builtins/exit.c \
+	exe/exe_helpers.c exe/sigs.c exe/env2array.c exe/gettingpath.c exe/redir.c exe/exe.c
+
+OBJS	= $(SRCS:.c=.o)
+
+READLINE	= -lreadline -lncurses
+
+all: $(LIBFT) $(NAME)
+
+$(LIBFT):
+	$(MAKE) -C $(LIBFT_DIR)
+
+$(NAME): $(OBJS) minishell.h
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) $(READLINE) -o $(NAME)
+
+clean:
+	rm -f $(OBJS)
+	$(MAKE) -C $(LIBFT_DIR) clean
+
+fclean: clean
+	rm -f $(NAME)
+	$(MAKE) -C $(LIBFT_DIR) fclean
+
+re: fclean all
+
+.PHONY: all clean fclean re

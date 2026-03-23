@@ -12,6 +12,8 @@ int main(int argc, char **argv, char **envp)
 	t_shell *shell;
 	char *inpt_line;
 
+	(void)argc;
+	(void)argv;
 	shell = init_shell(envp);
 	if (!shell)
 		return (1);
@@ -24,29 +26,30 @@ int main(int argc, char **argv, char **envp)
 		if (*inpt_line)
 			add_history(inpt_line);
 		t_token *tokens = tokenize(inpt_line, shell);
-		print_tokens(tokens);
+		free(inpt_line);
+		// print_tokens(tokens);
 
 		t_command *cmds = parse(tokens, shell);
-		print_commands(cmds);
+		// print_commands(cmds);
 
 		handle_heredoc(cmds, shell);
-		print_heredocs(cmds);
+		// print_heredocs(cmds);
 
 		check_env_expansion(cmds, shell);
-		printf("after expansion: \n");
-		print_commands(cmds);
+		// printf("after expansion: \n");
+		// print_commands(cmds);
 
 		handle_quotes(cmds, shell);
-		printf("after removing quotes: \n");
-		print_commands(cmds);
+		// printf("after removing quotes: \n");
+		// print_commands(cmds);
 
-		// execute(cmds);
+		execute(shell, cmds);
 		free_all(tokens, cmds);
 	}
 	return (0);
 }
 
-void print_error(t_shell *shell, const char *msg)
+void print_error_free(t_shell *shell, const char *msg)
 {
 	perror(msg);
 	free_all(shell->ptrs->tokens, shell->ptrs->commands);

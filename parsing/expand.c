@@ -48,7 +48,7 @@ void get_var(char *var_pos, char **var, t_shell *shell)
 	{
 		*var = ft_substr(var_pos, 0, 2);
 		if (!var)
-			print_error(shell, "minishell: malloc");
+			print_error_free(shell, "minishell: malloc");
 		return;
 	}
 	while (var_pos[i])
@@ -59,7 +59,7 @@ void get_var(char *var_pos, char **var, t_shell *shell)
 	}
 	*var = ft_substr(var_pos, 0, i);
 	if (!var)
-		print_error(shell, "minishell: malloc");
+		print_error_free(shell, "minishell: malloc");
 }
 
 int is_expandable(char *arg, char *var)
@@ -135,7 +135,6 @@ void assign_null(int num, ...)
 void expand_var(char *var, char **arg, t_shell *shell)
 {
 	char *env_value;
-	int i;
 	char *new_arg;
 	int new_len;
 
@@ -149,7 +148,7 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	if (!new_arg)
 	{
 		free(var);
-		print_error(shell, "minishell: malloc");
+		print_error_free(shell, "minishell: malloc");
 	}
 	replace_var(new_arg, env_value, *arg, var);
 	free_pointers(2, *arg, var);
