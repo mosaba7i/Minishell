@@ -121,7 +121,7 @@ void get_args(char **args, t_token *tokens, t_shell *shell)
 		if (!*args)
 			print_error_free(shell, "minishell: malloc");
 		tokens = tokens->next;
-		(*args)++;
+		(args)++;
 	}
 	*args = NULL;
 }
