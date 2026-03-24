@@ -2,11 +2,33 @@
 
 void get_input(t_redir *redirs, t_shell *shell);
 void read_heredoc_input(t_redir *redirs, int fd[2]);
+void start_heredoc(t_command *cmds, t_shell *shell);
 
-void handle_heredoc(t_command *cmds, t_shell *shell)
+int handle_heredoc(t_command *cmds, t_shell *shell)
 {
-	int fd[2];
+	int status;
+	pid_t pid;
+
+	pid = fork();
+	if (pid == 0)
+	{
+		initsig_heredoc();
+		start_heredoc(cmds, shell);
+		exit(0);
+	}
+	else
+	{
+		waitpid(pid, &status, 0);
+		if (WEXITSTATUS(status) == 130)
+			return (130);
+	}
+	return (0);
+}
+
+void start_heredoc(t_command *cmds, t_shell *shell)
+{
 	t_redir *redirs;
+	int fd[2];
 
 	while (cmds)
 	{

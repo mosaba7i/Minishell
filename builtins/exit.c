@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 18:36:48 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/15 19:16:31 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/23 21:51:51 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ int ft_exit(t_shell *shell, char **args)
 		}
 		exit_code = (unsigned int)ft_atoi(args[1]) % 256;
 	}
+	free_all(shell->ptrs->tokens, shell->ptrs->commands);
 	free_env(shell);
 	rl_clear_history();
 	exit(exit_code);

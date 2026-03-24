@@ -20,6 +20,7 @@ int main(int argc, char **argv, char **envp)
 
 	while (1)
 	{
+		initsig_prompt();
 		inpt_line = readline("minishell$ ");
 		if (!inpt_line) // ctrl+D
 			return (1);
@@ -32,7 +33,12 @@ int main(int argc, char **argv, char **envp)
 		t_command *cmds = parse(tokens, shell);
 		// print_commands(cmds);
 
-		handle_heredoc(cmds, shell);
+		if (handle_heredoc(cmds, shell) == 130)
+		{
+			shell->exit_status = 130;
+			continue;
+		}
+		initsig_prompt();
 		// print_heredocs(cmds);
 
 		check_env_expansion(cmds, shell);

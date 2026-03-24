@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/19 17:27:36 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/24 18:27:26 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void initsig_heredoc(void);
 void initsig_prompt(void);
 // parsing functions
 t_command *parse(t_token *tokens, t_shell *shell);
-void handle_heredoc(t_command *cmds, t_shell *shell);
+int handle_heredoc(t_command *cmds, t_shell *shell);
 t_token *tokenize(char *input, t_shell *shell);
 int is_white_space(char c);
 void assign_null(int num, ...);
