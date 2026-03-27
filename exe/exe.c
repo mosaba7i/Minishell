@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 00:00:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/24 18:25:18 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/23 21:21:29 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,17 +108,20 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	full_path = get_cmd_path(shell, command->arg_lst[0]);
 	if (!full_path)
 	{
-		write(2, "minishell: ", 11);
-		if (ft_strchr(command->arg_lst[0], '/'))
+		if(ft_strchr(command->arg_lst[0], '/'))
 		{
+			write(2, "minishell: ", 11);
 			perror(command->arg_lst[0]);
-			if (errno == ENOENT)
+			if(errno == ENOENT)
 				child_exit_cleanly(-1, -1, full_path, env_list, 127);
-			else if (errno == EACCES)
+			else if(errno == EACCES)
 				child_exit_cleanly(-1, -1, full_path, env_list, 126);
 		}
 		else
-			write(2, "command not found\n", 19);
+		{
+			write(2, command->arg_lst[0], ft_strlen(command->arg_lst[0]));
+			write(2, ": command not found\n", 21);
+		}
 		child_exit_cleanly(-1, -1, full_path, env_list, 127);
 	}
 	env_list = env_to_array(shell->env);
@@ -132,8 +135,8 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	perror(command->arg_lst[0]);
 	if (errno == EACCES)
 		child_exit_cleanly(-1, -1, full_path, env_list, 126);
-	else if (errno == ENOENT)
-		child_exit_cleanly(-1, -1, full_path, env_list, 127);
+	else if(errno == ENOENT)
+			child_exit_cleanly(-1, -1, full_path, env_list, 127);
 	child_exit_cleanly(-1, -1, full_path, env_list, 1);
 }
 

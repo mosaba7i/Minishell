@@ -23,7 +23,7 @@ int main(int argc, char **argv, char **envp)
 		initsig_prompt();
 		inpt_line = readline("minishell$ ");
 		if (!inpt_line) // ctrl+D
-			return (1);
+			ft_exit(shell, NULL);
 		if (*inpt_line)
 			add_history(inpt_line);
 		t_token *tokens = tokenize(inpt_line, shell);
@@ -36,9 +36,9 @@ int main(int argc, char **argv, char **envp)
 		if (handle_heredoc(cmds, shell) == 130)
 		{
 			shell->exit_status = 130;
-			continue;
+			free_all(tokens, cmds);
+			continue ;
 		}
-		initsig_prompt();
 		// print_heredocs(cmds);
 
 		check_env_expansion(cmds, shell);
@@ -215,8 +215,8 @@ void free_commands(t_command *head)
 			redir_tmp = tmp->redirs;
 			tmp->redirs = tmp->redirs->next;
 			free(redir_tmp->file);
-			if (redir_tmp->type == HEREDOC)
-				close(redir_tmp->fd);
+			if (redir_tmp->type == HEREDOC && redir_tmp->fd >= 0)
+    			close(redir_tmp->fd);
 			free(redir_tmp);
 		}
 		free(tmp);

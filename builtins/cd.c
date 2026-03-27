@@ -86,8 +86,14 @@ int ft_cd(t_shell *shell, t_command *cmd)
     char *path;
     char cwd[PATH_MAX]; // this header has a max len of char for paths which is 4096 in linux..
 
+
     if (!cmd->arg_lst[1])
-        path = get_env_value(shell, "HOME");
+		 path = get_env_value(shell, "HOME");
+	if (cmd->arg_lst[1] && cmd->arg_lst[2])
+	{
+		printf("minishell: cd: too many arguments\n");
+		return (1);
+	}
     else
         path = cmd->arg_lst[1];
     if (chdir(path) != 0)

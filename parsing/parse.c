@@ -58,7 +58,7 @@ int check_syntax(t_token *tokens)
 		tokens = tokens->next;
 	}
 	if (!tokens && is_operator_num(prev->type))
-		return (print_error_syntax(NULL, prev->value));
+		return (print_error_syntax("syntax error near unexpected token `newline'", prev->value));
 	return (0);
 }
 
@@ -143,6 +143,7 @@ t_redir *get_redir(t_token *tokens, t_shell *shell)
 			current->file = ft_strdup(tokens->next->value);
 			if (!current->file)
 				print_error_free(shell, "minishell: malloc");
+			current->fd = -1;
 			current->next = NULL;
 			append_redir(&head, current);
 			tokens = tokens->next->next;

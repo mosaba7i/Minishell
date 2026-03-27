@@ -12,7 +12,7 @@
 
 #include "../minishell.h"
 
-int	sign;
+int sign;
 
 static void	hand_sigint(int sig)
 {
@@ -53,6 +53,7 @@ void	initsig_heredoc(void)
 {
 	struct sigaction	sa;
 
+	sign = 0;
 	sa.sa_handler = hand_sigint_heredoc;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;

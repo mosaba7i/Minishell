@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/24 18:27:26 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/27 14:26:29 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 #include <dirent.h>			   // opendir, readdir, closedir
 #include <stdarg.h>			   // va_list, va_start, va_arg, va_end
 #include "./libft/libft.h"
-#include <limits.h> // PATH_MAX
+#include <limits.h> // PATH_MAX, LONG_MAX, LONG_MIN
 #include <errno.h>	// errno, perror, strerror
 /*ext func like readline can be installed with
 sudo apt-get update

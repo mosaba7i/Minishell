@@ -2,33 +2,12 @@
 
 void get_input(t_redir *redirs, t_shell *shell);
 void read_heredoc_input(t_redir *redirs, int fd[2]);
-void start_heredoc(t_command *cmds, t_shell *shell);
+int start_heredoc(t_redir *redirs, t_shell *shell);
 
 int handle_heredoc(t_command *cmds, t_shell *shell)
 {
-	int status;
-	pid_t pid;
-
-	pid = fork();
-	if (pid == 0)
-	{
-		initsig_heredoc();
-		start_heredoc(cmds, shell);
-		exit(0);
-	}
-	else
-	{
-		waitpid(pid, &status, 0);
-		if (WEXITSTATUS(status) == 130)
-			return (130);
-	}
-	return (0);
-}
-
-void start_heredoc(t_command *cmds, t_shell *shell)
-{
 	t_redir *redirs;
-	int fd[2];
+	int return_vl;
 
 	while (cmds)
 	{
@@ -38,26 +17,71 @@ void start_heredoc(t_command *cmds, t_shell *shell)
 			if (redirs->type == HEREDOC)
 			{
 				printf("Handling heredoc for delimiter: [%s]\n", redirs->file); // TODO: remove before turn in
-				if (pipe(fd) == -1)
-					print_error_free(shell, "minishell: pipe");
-				read_heredoc_input(redirs, fd);
-				close(fd[1]);
-				redirs->fd = fd[0];
+				return_vl = start_heredoc(redirs, shell);
+				if(return_vl)
+					return(return_vl);
 			}
 			redirs = redirs->next;
 		}
 		cmds = cmds->next;
 	}
+	return (0);
+}
+
+int start_heredoc(t_redir *redirs, t_shell *shell)
+{
+	pid_t pid;
+	int fd[2];
+	int status;
+
+	if (pipe(fd) == -1)
+		print_error_free(shell, "minishell: pipe");
+	signal(SIGINT, SIG_IGN);
+	pid = fork();
+	if (pid == 0)
+	{
+		close(fd[0]);
+		read_heredoc_input(redirs, fd);
+		close(fd[1]);
+		exit(0);
+	}
+	else
+	{
+		close(fd[1]);
+		waitpid(pid, &status, 0);
+		initsig_prompt();
+		if (WEXITSTATUS(status) == 130)
+			return (130);
+	}
+	redirs->fd = fd[0];
+	return (0);
+}
+
+int	ft_strcmp(const char *s1, const char *s2)
+{
+	size_t	i;
+
+	i = 0;
+	while ((unsigned char)s1[i] != '\0'
+		&& (unsigned char)s2[i] == (unsigned char)s1[i])
+		i++;
+	return ((unsigned char)s1[i] - (unsigned char)s2[i]);
 }
 
 void read_heredoc_input(t_redir *redirs, int fd[2])
 {
 	char *line;
 
+	initsig_heredoc();
 	while (1)
 	{
 		line = readline("> ");
-		if (!line || !ft_strncmp(line, redirs->file, ft_strlen(redirs->file)))
+		if(!line)
+		{
+			printf("minishell: warning: here-document delimited by end-of-file (wanted `%s')\n", redirs->file);
+			return ;
+		}
+		if (!ft_strcmp(line, redirs->file))
 		{
 			free(line);
 			return;
