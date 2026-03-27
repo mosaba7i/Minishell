@@ -37,7 +37,7 @@ int main(int argc, char **argv, char **envp)
 		{
 			shell->exit_status = 130;
 			free_all(tokens, cmds);
-			continue ;
+			continue;
 		}
 		// print_heredocs(cmds);
 
@@ -53,6 +53,16 @@ int main(int argc, char **argv, char **envp)
 		free_all(tokens, cmds);
 	}
 	return (0);
+}
+
+int ft_strcmp(const char *s1, const char *s2)
+{
+	size_t i;
+
+	i = 0;
+	while ((unsigned char)s1[i] != '\0' && (unsigned char)s2[i] == (unsigned char)s1[i])
+		i++;
+	return ((unsigned char)s1[i] - (unsigned char)s2[i]);
 }
 
 void print_error_free(t_shell *shell, const char *msg)
@@ -216,7 +226,7 @@ void free_commands(t_command *head)
 			tmp->redirs = tmp->redirs->next;
 			free(redir_tmp->file);
 			if (redir_tmp->type == HEREDOC && redir_tmp->fd >= 0)
-    			close(redir_tmp->fd);
+				close(redir_tmp->fd);
 			free(redir_tmp);
 		}
 		free(tmp);

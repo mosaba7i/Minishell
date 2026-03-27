@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:11:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/16 15:41:56 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/03/27 18:09:08 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ static t_env *find_env(t_env *env, char *key)
 {
     while (env)
     {
-        if (ft_strncmp(env->key, key, ft_strlen(key)) == 0)
+        if (ft_strcmp(env->key, key) == 0)
             return env;
         env = env->next;
     }

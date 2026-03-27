@@ -51,7 +51,7 @@ int is_operator_char(char c)
 
 int extract_word(char *input, int i)
 {
-	char inside_qoute = 0;
+	char inside_qoute;
 	size_t word;
 
 	word = i;

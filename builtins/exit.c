@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 18:36:48 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/27 16:59:56 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/27 19:12:35 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ static int check_args(char **args, int *exit_code)
 		num = ft_atol(args[1], &overflow);
 		if (!is_valid_num(args[1]) || ft_strlen(args[1]) == 0 || overflow)
 		{
-			printf("minishell: exit: %s: numeric argument required\n", args[1]);
+			ft_fprintf(2, "minishell: exit: %s: numeric argument required\n", args[1]);
 			*exit_code = 2;
 		}
 		else

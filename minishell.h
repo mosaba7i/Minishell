@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/27 14:26:29 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/27 20:48:30 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <dirent.h>			   // opendir, readdir, closedir
 #include <stdarg.h>			   // va_list, va_start, va_arg, va_end
 #include "./libft/libft.h"
+#include "./fprintf/ft_fprintf.h"
 #include <limits.h> // PATH_MAX, LONG_MAX, LONG_MIN
 #include <errno.h>	// errno, perror, strerror
 /*ext func like readline can be installed with
@@ -114,6 +115,7 @@ int ft_exit(t_shell *shell, char **args);
 int ft_cd(t_shell *shell, t_command *cmd);
 int ft_env(t_shell *shell);
 int ft_unset(t_shell *shell, char **args);
+int ft_strcmp(const char *s1, const char *s2);
 
 // execution functions
 int execute(t_shell *shell, t_command *command_list);

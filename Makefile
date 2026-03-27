@@ -1,10 +1,13 @@
 NAME	= minishell
 
 CC		= cc
-CFLAGS	= -Wall -Wextra -Werror
+CFLAGS	= -Wall -Wextra -Werror -g
 
 LIBFT_DIR	= libft
 LIBFT		= $(LIBFT_DIR)/libft.a
+
+FPRINTF_DIR	= fprintf
+FPRINTF		= $(FPRINTF_DIR)/libftfprintf.a
 
 SRCS	= main.c init_shell.c \
 	parsing/tokenise.c parsing/parse.c parsing/heredoc.c parsing/expand.c parsing/remove_quotes.c \
@@ -16,21 +19,26 @@ OBJS	= $(SRCS:.c=.o)
 
 READLINE	= -lreadline -lncurses
 
-all: $(LIBFT) $(NAME)
+all: $(LIBFT) $(FPRINTF) $(NAME)
 
 $(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR)
 
+$(FPRINTF):
+	$(MAKE) -C $(FPRINTF_DIR)
+
 $(NAME): $(OBJS) minishell.h
-	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) $(READLINE) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) $(FPRINTF) $(READLINE) -o $(NAME)
 
 clean:
 	rm -f $(OBJS)
 	$(MAKE) -C $(LIBFT_DIR) clean
+	$(MAKE) -C $(FPRINTF_DIR) clean
 
 fclean: clean
 	rm -f $(NAME)
 	$(MAKE) -C $(LIBFT_DIR) fclean
+	$(MAKE) -C $(FPRINTF_DIR) fclean
 
 re: fclean all
 
