@@ -50,7 +50,8 @@ int main(int argc, char **argv, char **envp)
 		// print_commands(cmds);
 
 		execute(shell, cmds);
-		free_all(tokens, cmds);
+		free_all(shell->ptrs->tokens, shell->ptrs->commands);
+		assign_null(2, &shell->ptrs->tokens, &shell->ptrs->commands);
 	}
 	return (0);
 }

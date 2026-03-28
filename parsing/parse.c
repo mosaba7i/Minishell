@@ -9,14 +9,14 @@ void append_command(t_command **head, t_command *new);
 t_redir *get_redir(t_token *tokens, t_shell *shell);
 int is_redirection(char *str, int num);
 int is_operator_num(int num);
-int check_syntax(t_token *tokens);
+int check_syntax(t_token *tokens, t_shell *shell);
 
 t_command *parse(t_token *tokens, t_shell *shell)
 {
 	t_command *head;
 	t_command *current_cmd;
 
-	if (check_syntax(tokens) == -1)
+	if (check_syntax(tokens, shell) == -1)
 		return (NULL);
 	head = NULL;
 	while (tokens)
@@ -38,7 +38,7 @@ t_command *parse(t_token *tokens, t_shell *shell)
 	return (head);
 }
 
-int check_syntax(t_token *tokens)
+int check_syntax(t_token *tokens, t_shell *shell)
 {
 	t_token *prev;
 
@@ -47,32 +47,29 @@ int check_syntax(t_token *tokens)
 	prev = tokens;
 	tokens = tokens->next;
 	if (prev->type == PIPE)
-		return (print_error_syntax(NULL, "|"));
+		return (print_error_syntax(NULL, "|", shell));
 	while (tokens)
 	{
 		if (is_redirection(NULL, prev->type) && is_operator_num(tokens->type))
-			return (print_error_syntax(NULL, tokens->value));
+			return (print_error_syntax(NULL, tokens->value, shell));
 		if (prev->type == PIPE && tokens->type == PIPE)
-			return (print_error_syntax(NULL, "|"));
+			return (print_error_syntax(NULL, "|", shell));
 		prev = tokens;
 		tokens = tokens->next;
 	}
 	if (!tokens && is_operator_num(prev->type))
-		return (print_error_syntax("syntax error near unexpected token `newline'", prev->value));
+		return (print_error_syntax("syntax error near unexpected token `newline'", prev->value, shell));
 	return (0);
 }
 
-int print_error_syntax(char *msg, char *str)
+int print_error_syntax(char *msg, char *str, t_shell *shell)
 {
+	shell->exit_status = 2;
 	write(2, "minishell: ", 11);
 	if (msg)
 		write(2, msg, ft_strlen(msg));
 	else
-	{
-		write(2, "syntax error near unexpected token `", 37);
-		write(2, str, ft_strlen(str));
-		write(2, "'", 1);
-	}
+		ft_fprintf(2, "syntax error near unexpected token `%s'", str);
 	write(2, "\n", 1);
 	return (-1); // TODO: check exit code
 }

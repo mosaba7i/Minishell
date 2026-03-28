@@ -8,8 +8,11 @@ void free_pointers(const int pointer_count, ...);
 void replace_var(char *new_arg, char *env_value, char *arg, char *var);
 void expand_var(char *var, char **arg, t_shell *shell);
 int get_new_arg_len(char *arg, char *var, char *env_value);
-void search_var(t_command *cmds, t_shell *shell, char symbol, int i);
+void search_var(t_command *cmds, t_shell *shell, int i);
 int inside_qoutes(char *arg, char *var);
+int is_tilde(char *var);
+void get_tilde_value(char *var, char **env_value);
+void search_tilde(t_command *cmds, t_shell *shell, int i);
 
 void check_env_expansion(t_command *cmds, t_shell *shell)
 {
@@ -20,31 +23,43 @@ void check_env_expansion(t_command *cmds, t_shell *shell)
 		i = 0;
 		while (cmds->arg_lst[i])
 		{
-			search_var(cmds, shell, '$', i);
-			search_var(cmds, shell, '~', i);
+			search_var(cmds, shell, i);
+			search_tilde(cmds, shell, i);
 			i++;
 		}
 		cmds = cmds->next;
 	}
 }
 
-void search_var(t_command *cmds, t_shell *shell, char symbol, int i)
+void search_var(t_command *cmds, t_shell *shell, int i)
 {
 	char *pos;
 	char *var;
 
-	pos = ft_strchr(cmds->arg_lst[i], symbol);
+	var = NULL;
+	pos = ft_strchr(cmds->arg_lst[i], '$');
 	while (pos)
 	{
 		get_var(pos, &var, shell);
-		if (is_expandable(cmds->arg_lst[i], var))
+		if (var && is_expandable(cmds->arg_lst[i], var))
 		{
 			expand_var(var, &cmds->arg_lst[i], shell);
-			pos = ft_strchr(cmds->arg_lst[i], symbol); // since we overwritten and freed arg, pos point to garbage
+			pos = ft_strchr(cmds->arg_lst[i], '$'); // since we overwritten and freed arg, pos point to garbage
 			continue;
 		}
-		pos = ft_strchr(pos + 1, symbol);
+		pos = ft_strchr(pos + 1, '$');
 	}
+}
+
+void search_tilde(t_command *cmds, t_shell *shell, int i)
+{
+	char *var;
+
+	if (cmds->arg_lst[i][0] != '~')
+		return;
+	var = NULL;
+	get_var(cmds->arg_lst[i], &var, shell);
+	expand_var(var, &cmds->arg_lst[i], shell);
 }
 
 void get_var(char *var_pos, char **var, t_shell *shell)
@@ -52,39 +67,36 @@ void get_var(char *var_pos, char **var, t_shell *shell)
 	int i;
 
 	i = 1;
-	if (var_pos[1] == '?')
+	if (var_pos[1] == '?' || is_tilde(var_pos))
 	{
-		*var = ft_substr(var_pos, 0, 2);
+		if (var_pos[1] == '\0' || var_pos[1] == '/' || var_pos[1] == ':')
+			*var = ft_substr(var_pos, 0, 1);
+		else
+			*var = ft_substr(var_pos, 0, 2);
 		if (!var)
 			print_error_free(shell, "minishell: malloc");
 		return;
 	}
-	if (var_pos[1] == '~')
-	{
-		if (var_pos[2] != '~')
-			*var = ft_strdup("~");
-		return;
-	}
 	while (var_pos[i])
 	{
-		if (!ft_isalnum(var_pos[i]) && var_pos[i] != '_')
+		if (var_pos[0] == '$' && !ft_isalnum(var_pos[i]) && var_pos[i] != '_')
 			break;
 		i++;
 	}
 	*var = ft_substr(var_pos, 0, i);
-	if (!var)
+	if (!*var)
 		print_error_free(shell, "minishell: malloc");
 }
 
 int is_expandable(char *arg, char *var)
 {
-	if (!ft_strncmp(arg, var, ft_strlen(arg))) // var is on its own in the arg
-		return (1);
-	if (!ft_strncmp(var, "$", 2) || inside_single_qoutes(arg, var))
+	if (!ft_strncmp(var, "$", 2) || inside_single_qoutes(arg, var)) // $ is on its own in the arg and is between single qoutes
 	{
 		free(var);
 		return (0);
 	}
+	if (!ft_strncmp(arg, var, ft_strlen(arg))) // var is on its own in the arg
+		return (1);
 	if (!ft_strncmp(var, "~", 1) && inside_qoutes(arg, var))
 	{
 		free(var);
@@ -93,6 +105,20 @@ int is_expandable(char *arg, char *var)
 	if (!ft_strncmp(var, "$?", 3))
 		return (1);
 	return (1);
+}
+
+int is_tilde(char *var)
+{
+	if (var[0] != '~')
+		return (0);
+	if (var[1] == '\0' || var[1] == '/' || var[1] == ':')
+		return (1);
+	else if (var[1] == '0' || var[1] == '-' || var[1] == '+')
+	{
+		if (var[2] == '\0' || var[2] == '/' || var[2] == ':')
+			return (1);
+	}
+	return (0);
 }
 
 int inside_single_qoutes(char *arg, char *var)
@@ -188,10 +214,15 @@ void expand_var(char *var, char **arg, t_shell *shell)
 
 	if (!ft_strncmp(var, "$?", 3))
 		env_value = ft_itoa(shell->exit_status);
-	else if (!ft_strncmp(var, "~", 1))
-		env_value = ft_strdup(getenv("HOME"));
+	else if (var[0] == '~')
+		get_tilde_value(var, &env_value);
 	else
 		env_value = ft_strdup(getenv(var + 1));
+	if (!env_value)
+	{
+		free(var);
+		print_error_free(shell, "minishell: malloc");
+	}
 	new_len = get_new_arg_len(*arg, var, env_value);
 	new_arg = ft_calloc(new_len + 1, sizeof(char));
 	if (!new_arg)
@@ -202,6 +233,20 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	replace_var(new_arg, env_value, *arg, var);
 	free_pointers(3, *arg, var, env_value);
 	*arg = new_arg;
+}
+
+void get_tilde_value(char *var, char **env_value)
+{
+	if (var[1] == '\0' || var[1] == '/' || var[1] == ':')
+		*env_value = ft_strdup(getenv("HOME"));
+	else if ((var[1] == '+' || var[1] == '0') && (var[2] == '\0' || var[2] == '/' || var[2] == ':'))
+		*env_value = ft_strdup(getenv("PWD"));
+	else if (var[1] == '-' && (var[2] == '\0' || var[2] == '/' || var[2] == ':'))
+		*env_value = ft_strdup(getenv("OLDPWD"));
+	else if (ft_strcmp(var + 1, getenv("USER")) == 0)
+		*env_value = ft_strdup(getenv("HOME"));
+	else
+		*env_value = ft_strdup(var);
 }
 
 void replace_var(char *new_arg, char *env_value, char *arg, char *var)

@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 15:38:10 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/27 18:16:09 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/28 12:05:40 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,8 @@ int ft_cd(t_shell *shell, t_command *cmd)
     char *path;
     char cwd[PATH_MAX]; // this header has a max len of char for paths which is 4096 in linux..
 
+    if (cmd->arg_lst[2])
+        return (print_error("cd", "too many arguments", 1));
     if (!cmd->arg_lst[1])
         path = get_env_value(shell, "HOME");
     else
@@ -94,7 +96,7 @@ int ft_cd(t_shell *shell, t_command *cmd)
         path = ".";
     if (chdir(path) != 0)
     {
-        print_error("cd", strerror(errno), 1);
+        ft_fprintf(2, "minishell: cd: %s: %s\n", path, strerror(errno));
         return (1);
     }
     getcwd(cwd, sizeof(cwd));

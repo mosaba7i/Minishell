@@ -19,4 +19,74 @@
 15- exit 9k
 16- exit 9223372036854775807 (long max)
 17- exit -9223372036854775808 (long min)
+18- exit ~
+19- exit "~"
 
+----------------------------CD----------------------------------
+1- cd
+2- cd $HOME
+3- cd $NON
+4- cd ""
+5- cd 1 2 3 (more than 2 args)
+6- cd ~
+7- cd "~"
+8- cd ../../../../../../../../../..
+9- cd .
+10- cd /
+11- cd ~/projects/ (real path)
+12- cd /home/lujain/projects/mini/builins
+13- cd // (?_?)
+14- cd ////
+15- cd ////////////////////////////////////////////
+16- cd ~username
+17- cd ~-
+18- cd ~+
+19- cd ~~
+20- cd ~0
+21- cd ~kjsdksnd
+22- cd file (not directory)
+23- cd 255_characters_directory_name
+24- cd 256_characters_directory_name
+
+"filefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefil"
+
+----------------------------ECHO--------------------------------
+1- echo
+2- echo $HOME
+3- echo '$HOME'
+4- echo "$HOME"
+5- echo $NON
+6- echo ~
+7- echo "~"
+8- echo $?
+9- echo "$?"
+10- echo '$?'
+11- echo $?shdsd
+12- echo .
+13- echo 1 2 3 4 5 6
+14- echo -n 1 2 3 4 5 6
+15- echo -f 1 2 3 4 5 6
+16- echo --n 1 2 3 4 5 6
+17- echo -n -n -n 1 2 3 4 5 6
+18- echo -n -n -n
+19- echo -nnnnnnnnnnnnnnnnn 1 2 3 4 5 6
+20- echo -nnnnnnnnnnnnnnnne 1 2 3 4 5 6
+21- echo 1 -n 2 3 4 5 6
+22- echo $
+23- echo ""
+24- echo ''
+25- echo "$"
+26- echo '$'
+27- echo -e
+28- echo "''"
+29- echo -n-
+30- echo "'$HOME'"
+31- echo '"" "" "" ""'
+32- echo '"$HOME"'
+----------------------------PWD--------------------------------
+1- pwd
+2- pwd hello
+3- pwd .
+4- pwd ..
+5- pwd ~
+6- pwd 1 2 3 4 5
