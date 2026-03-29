@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:11:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/27 18:09:08 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/29 16:34:26 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ int export_var(t_env **env, char *arg)
 
     if (!is_valid_identifier(arg))
     {
-        printf("minishell: export: `%s': not a valid identifier\n", arg);
+        ft_fprintf(2, "minishell: export: `%s': not a valid identifier\n", arg);
         return (1);
     }
     equal = ft_strchr(arg, '=');

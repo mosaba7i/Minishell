@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 14:51:44 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/19 17:29:01 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/29 16:35:04 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,8 @@ int export(t_shell *shell, char **args)
 
     while (args[i])
     {
-        export_var(&shell->env, args[i]);
+        if (export_var(&shell->env, args[i]))
+            return (1);
         i++;
     }
     return (0);

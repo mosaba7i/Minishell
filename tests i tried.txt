@@ -21,6 +21,7 @@
 17- exit -9223372036854775808 (long min)
 18- exit ~
 19- exit "~"
+20- exit $?
 
 ----------------------------CD----------------------------------
 1- cd
@@ -47,6 +48,7 @@
 22- cd file (not directory)
 23- cd 255_characters_directory_name
 24- cd 256_characters_directory_name
+25- cd -
 
 "filefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefil"
 
@@ -83,6 +85,8 @@
 30- echo "'$HOME'"
 31- echo '"" "" "" ""'
 32- echo '"$HOME"'
+33- echo hello > world here I am
+34- echo $'HOME' ($"..." is bash syntax not required by subject :) )
 ----------------------------PWD--------------------------------
 1- pwd
 2- pwd hello
@@ -90,3 +94,19 @@
 4- pwd ..
 5- pwd ~
 6- pwd 1 2 3 4 5
+
+----------------------------REDIR&PIPEs-------------------------
+1- >
+2- <
+3- >>
+4- <<
+5- >>>> >> >> >>
+6- > > > >
+
+----------------------------COMPOUND---------------------------
+1- 
+echo $PWD 
+echo $OLDPWD
+cd ..
+echo $PWD 
+echo $OLDPWD

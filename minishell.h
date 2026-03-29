@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:55:20 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/28 18:17:15 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/29 15:08:39 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,5 +142,6 @@ void print_error_free(t_shell *shell, const char *msg);
 int print_error_syntax(char *msg, char *str, t_shell *shell);
 void free_tokens(t_token *head);
 void *free_all(t_token *tokens, t_command *cmds);
+char *get_env_value(t_shell *shell, char *key);
 
 #endif

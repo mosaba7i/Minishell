@@ -11,8 +11,9 @@ int get_new_arg_len(char *arg, char *var, char *env_value);
 void search_var(t_command *cmds, t_shell *shell, int i);
 int inside_qoutes(char *arg, char *var);
 int is_tilde(char *var);
-void get_tilde_value(char *var, char **env_value);
+void get_tilde_value(char *var, char **env_value, t_shell *shell);
 void search_tilde(t_command *cmds, t_shell *shell, int i);
+char *get_num(char *var, t_shell *shell);
 
 void check_env_expansion(t_command *cmds, t_shell *shell)
 {
@@ -212,12 +213,12 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	char *new_arg;
 	int new_len;
 
-	if (!ft_strncmp(var, "$?", 3))
-		env_value = ft_itoa(shell->exit_status);
+	if (var[0] == '$')
+		env_value = get_num(var, shell);
 	else if (var[0] == '~')
-		get_tilde_value(var, &env_value);
+		get_tilde_value(var, &env_value, shell);
 	else
-		env_value = ft_strdup(getenv(var + 1));
+		env_value = ft_strdup(get_env_value(shell, var + 1));
 	if (!env_value)
 	{
 		free(var);
@@ -235,16 +236,25 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	*arg = new_arg;
 }
 
-void get_tilde_value(char *var, char **env_value)
+char *get_num(char *var, t_shell *shell)
+{
+	if (var[0] == '$' && var[1] >= '0' && var[1] <= '9')
+		return (ft_strdup(""));
+	else if (var[1] == '?')
+		return (ft_itoa(shell->exit_status));
+	return (NULL);
+}
+
+void get_tilde_value(char *var, char **env_value, t_shell *shell)
 {
 	if (var[1] == '\0' || var[1] == '/' || var[1] == ':')
-		*env_value = ft_strdup(getenv("HOME"));
+		*env_value = ft_strdup(get_env_value(shell, "HOME"));
 	else if ((var[1] == '+' || var[1] == '0') && (var[2] == '\0' || var[2] == '/' || var[2] == ':'))
-		*env_value = ft_strdup(getenv("PWD"));
+		*env_value = ft_strdup(get_env_value(shell, "PWD"));
 	else if (var[1] == '-' && (var[2] == '\0' || var[2] == '/' || var[2] == ':'))
-		*env_value = ft_strdup(getenv("OLDPWD"));
-	else if (ft_strcmp(var + 1, getenv("USER")) == 0)
-		*env_value = ft_strdup(getenv("HOME"));
+		*env_value = ft_strdup(get_env_value(shell, "OLDPWD"));
+	else if (ft_strcmp(var + 1, get_env_value(shell, "USER")) == 0)
+		*env_value = ft_strdup(get_env_value(shell, "HOME"));
 	else
 		*env_value = ft_strdup(var);
 }

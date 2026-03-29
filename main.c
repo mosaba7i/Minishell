@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/03/29 13:28:20 by lalkhati          #+#    #+#             */
+/*   Updated: 2026/03/29 15:20:44 by lalkhati         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "minishell.h"
 
@@ -11,6 +22,8 @@ int main(int argc, char **argv, char **envp)
 {
 	t_shell *shell;
 	char *inpt_line;
+	char *prompt;
+	char *pwd;
 
 	(void)argc;
 	(void)argv;
@@ -20,8 +33,11 @@ int main(int argc, char **argv, char **envp)
 
 	while (1)
 	{
+		pwd = get_env_value(shell, "PWD");
+		prompt = ft_strjoin(pwd, "$ ");
 		initsig_prompt();
-		inpt_line = readline("minishell$ ");
+		inpt_line = readline(prompt);
+		free(prompt);
 		if (!inpt_line) // ctrl+D
 			ft_exit(shell, NULL);
 		if (*inpt_line)

@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 15:38:10 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/28 12:05:40 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/29 15:10:39 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ static void set_env_value(t_shell *shell, char *key, char *value)
     }
 }
 
-static char *get_env_value(t_shell *shell, char *key)
+char *get_env_value(t_shell *shell, char *key)
 {
     t_env *tmp;
 
@@ -85,7 +85,9 @@ int ft_cd(t_shell *shell, t_command *cmd)
 {
     char *path;
     char cwd[PATH_MAX]; // this header has a max len of char for paths which is 4096 in linux..
+    char oldpwd[PATH_MAX];
 
+    getcwd(oldpwd, sizeof(oldpwd));
     if (cmd->arg_lst[2])
         return (print_error("cd", "too many arguments", 1));
     if (!cmd->arg_lst[1])
@@ -94,6 +96,8 @@ int ft_cd(t_shell *shell, t_command *cmd)
         path = cmd->arg_lst[1];
     if (ft_strlen(path) == 0)
         path = ".";
+    if (ft_strcmp(path, "-") == 0)
+        path = get_env_value(shell, "OLDPWD");
     if (chdir(path) != 0)
     {
         ft_fprintf(2, "minishell: cd: %s: %s\n", path, strerror(errno));
@@ -101,6 +105,7 @@ int ft_cd(t_shell *shell, t_command *cmd)
     }
     getcwd(cwd, sizeof(cwd));
     set_env_value(shell, "PWD", cwd);
+    set_env_value(shell, "OLDPWD", oldpwd);
     return (0);
 }
 
