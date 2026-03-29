@@ -5,31 +5,46 @@ int count_quotes(char *arg);
 void get_quotes(char **arg, char **quote_pos);
 int is_quote(char *pos, char **quote_pos);
 char *remove_quotes(char **arg, char **quote_pos, t_shell *shell);
+void search_remove_quotes(char **arg, t_shell *shell);
 
 void handle_quotes(t_command *cmds, t_shell *shell)
 {
 	int i;
-	char *new_arg;
-	char **quote_pos;
+	t_redir *redir_temp;
 
 	while (cmds)
 	{
 		i = 0;
 		while (cmds->arg_lst[i])
 		{
-			if (count_quotes(cmds->arg_lst[i]) > 0)
-			{
-				quote_pos = ft_calloc((count_quotes(cmds->arg_lst[i]) + 1), sizeof(char *));
-				if (!quote_pos)
-					print_error_free(shell, "minishell: malloc");
-				get_quotes(&cmds->arg_lst[i], quote_pos);
-				new_arg = remove_quotes(&cmds->arg_lst[i], quote_pos, shell);
-				cmds->arg_lst[i] = new_arg;
-				free(quote_pos);
-			}
+			search_remove_quotes(&cmds->arg_lst[i], shell);
 			i++;
 		}
+		redir_temp = cmds->redirs;
+		while (redir_temp)
+		{
+			if (redir_temp->file)
+				search_remove_quotes(&redir_temp->file, shell);
+			redir_temp = redir_temp->next;
+		}
 		cmds = cmds->next;
+	}
+}
+
+void search_remove_quotes(char **arg, t_shell *shell)
+{
+	char *new_arg;
+	char **quote_pos;
+
+	if (count_quotes(*arg) > 0)
+	{
+		quote_pos = ft_calloc((count_quotes(*arg) + 1), sizeof(char *));
+		if (!quote_pos)
+			print_error_free(shell, "minishell: malloc");
+		get_quotes(arg, quote_pos);
+		new_arg = remove_quotes(arg, quote_pos, shell);
+		*arg = new_arg;
+		free(quote_pos);
 	}
 }
 

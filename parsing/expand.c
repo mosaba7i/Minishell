@@ -14,6 +14,8 @@ int is_tilde(char *var);
 void get_tilde_value(char *var, char **env_value, t_shell *shell);
 void search_tilde(t_command *cmds, t_shell *shell, int i);
 char *get_num(char *var, t_shell *shell);
+void shift_args(char **arg_lst, int index);
+void print_args(char **args);
 
 void check_env_expansion(t_command *cmds, t_shell *shell)
 {
@@ -25,10 +27,40 @@ void check_env_expansion(t_command *cmds, t_shell *shell)
 		while (cmds->arg_lst[i])
 		{
 			search_var(cmds, shell, i);
+			if (ft_strlen(cmds->arg_lst[i]) == 0)
+			{
+				shift_args(cmds->arg_lst, i);
+				continue;
+			}
 			search_tilde(cmds, shell, i);
 			i++;
 		}
 		cmds = cmds->next;
+	}
+}
+
+// TODO: remove print_args before turn in
+void print_args(char **args)
+{
+	int i = 0;
+	printf("Args: \n");
+	while (args[i])
+	{
+		printf("%s\n", args[i]);
+		i++;
+	}
+}
+
+void shift_args(char **arg_lst, int index)
+{
+	int i;
+
+	free(arg_lst[index]);
+	i = index;
+	while (arg_lst[i])
+	{
+		arg_lst[i] = arg_lst[i + 1];
+		i++;
 	}
 }
 
@@ -67,24 +99,24 @@ void get_var(char *var_pos, char **var, t_shell *shell)
 {
 	int i;
 
-	i = 1;
-	if (var_pos[1] == '?' || is_tilde(var_pos))
+	if (var_pos[1] == '?' || ft_isdigit(var_pos[1]) || is_tilde(var_pos))
 	{
 		if (var_pos[1] == '\0' || var_pos[1] == '/' || var_pos[1] == ':')
 			*var = ft_substr(var_pos, 0, 1);
 		else
 			*var = ft_substr(var_pos, 0, 2);
-		if (!var)
-			print_error_free(shell, "minishell: malloc");
-		return;
 	}
-	while (var_pos[i])
+	else
 	{
-		if (var_pos[0] == '$' && !ft_isalnum(var_pos[i]) && var_pos[i] != '_')
-			break;
-		i++;
+		i = 1;
+		while (var_pos[i])
+		{
+			if (var_pos[0] == '$' && !ft_isalnum(var_pos[i]) && var_pos[i] != '_')
+				break;
+			i++;
+		}
+		*var = ft_substr(var_pos, 0, i);
 	}
-	*var = ft_substr(var_pos, 0, i);
 	if (!*var)
 		print_error_free(shell, "minishell: malloc");
 }
@@ -213,7 +245,7 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	char *new_arg;
 	int new_len;
 
-	if (var[0] == '$')
+	if (var[0] == '$' && !ft_isalpha(var[1]))
 		env_value = get_num(var, shell);
 	else if (var[0] == '~')
 		get_tilde_value(var, &env_value, shell);

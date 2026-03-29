@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 18:36:48 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/29 14:36:45 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/29 18:45:40 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ static int check_args(char **args, int *exit_code)
 	{
 		if (args[2])
 		{
-			printf("minishell: exit: too many arguments\n");
+			ft_fprintf(2, "minishell: exit: too many arguments\n");
 			return (1);
 		}
 		num = ft_atol(args[1], &overflow);
