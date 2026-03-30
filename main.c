@@ -80,12 +80,15 @@ static void update_last_arg(t_command *cmd, t_shell *shell)
 {
 	int i;
 
-	if (!cmd->arg_lst)
+	if (!cmd || !cmd->arg_lst)
+		return;
+	if (cmd->next)
 		return;
 	i = 0;
 	while (cmd->arg_lst[i])
 		i++;
-	set_env_value(shell, "_", cmd->arg_lst[i - 1]);
+	if (i > 0)
+		set_env_value(shell, "_", cmd->arg_lst[i - 1]);
 }
 
 int ft_strcmp(const char *s1, const char *s2)
