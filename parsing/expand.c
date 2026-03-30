@@ -272,6 +272,8 @@ char *get_expand_value(char *var, t_shell *shell)
 		value = get_env_value(shell, var + 1);
 		if (!value) // if the variable doesn't exist in env, we replace it with empty string
 			value = ft_strdup("");
+		else if (var[0] == '$' && var[1] == '_' && var[2] == '\0' && ft_strchr(value, '/'))
+			value = ft_strdup(ft_strrchr(value, '/') + 1);
 		else
 			value = ft_strdup(value);
 	}

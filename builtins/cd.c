@@ -88,7 +88,7 @@ int ft_cd(t_shell *shell, t_command *cmd)
     char oldpwd[PATH_MAX];
 
     getcwd(oldpwd, sizeof(oldpwd));
-    if (cmd->arg_lst[2])
+    if (cmd->arg_lst[1] && cmd->arg_lst[2])
         return (print_error("cd", "too many arguments", 1));
     if (!cmd->arg_lst[1])
         path = get_env_value(shell, "HOME");

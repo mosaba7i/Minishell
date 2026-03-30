@@ -79,6 +79,7 @@ int main(int argc, char **argv, char **envp)
 static void update_last_arg(t_command *cmd, t_shell *shell)
 {
 	int i;
+	char *path;
 
 	if (!cmd || !cmd->arg_lst)
 		return;
@@ -88,7 +89,16 @@ static void update_last_arg(t_command *cmd, t_shell *shell)
 	while (cmd->arg_lst[i])
 		i++;
 	if (i > 0)
-		set_env_value(shell, "_", cmd->arg_lst[i - 1]);
+	{
+		path = get_cmd_path(shell, cmd->arg_lst[0]);
+		if (path)
+		{
+			set_env_value(shell, "_", path);
+			free(path);
+		}
+		else
+			set_env_value(shell, "_", cmd->arg_lst[i - 1]);
+	}
 }
 
 int ft_strcmp(const char *s1, const char *s2)
