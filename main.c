@@ -17,6 +17,7 @@ void debug_print_heredocs(t_redir *redir_list);
 void free_commands(t_command *head);
 void print_heredocs(t_command *head);
 void print_commands(t_command *head);
+static void update_last_arg(t_command *cmd, t_shell *shell);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -66,12 +67,25 @@ int main(int argc, char **argv, char **envp)
 		handle_quotes(cmds, shell);
 		// printf("after removing quotes: \n");
 		// print_commands(cmds);
+		update_last_arg(cmds, shell);
 
 		execute(shell, cmds);
 		free_all(shell->ptrs->tokens, shell->ptrs->commands);
 		assign_null(2, &shell->ptrs->tokens, &shell->ptrs->commands);
 	}
 	return (0);
+}
+
+static void update_last_arg(t_command *cmd, t_shell *shell)
+{
+	int i;
+
+	if (!cmd->arg_lst)
+		return;
+	i = 0;
+	while (cmd->arg_lst[i])
+		i++;
+	set_env_value(shell, "_", cmd->arg_lst[i - 1]);
 }
 
 int ft_strcmp(const char *s1, const char *s2)

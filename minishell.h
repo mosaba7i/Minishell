@@ -143,5 +143,6 @@ int print_error_syntax(char *msg, char *str, t_shell *shell);
 void free_tokens(t_token *head);
 void *free_all(t_token *tokens, t_command *cmds);
 char *get_env_value(t_shell *shell, char *key);
+void set_env_value(t_shell *shell, char *key, char *value);
 
 #endif

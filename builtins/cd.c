@@ -37,7 +37,7 @@ static t_env *find_env(t_env *env, char *key)
     return (NULL);
 }
 
-static void set_env_value(t_shell *shell, char *key, char *value)
+void set_env_value(t_shell *shell, char *key, char *value)
 {
     t_env *node;
 

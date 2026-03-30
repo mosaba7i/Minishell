@@ -87,6 +87,9 @@
 32- echo '"$HOME"'
 33- echo hello > world here I am
 34- echo $'HOME' ($"..." is bash syntax not required by subject :) )
+35- echo $1sgbdsd
+36- echo $1sjhdd$1$1
+37- echo "'$1jsdsd'"
 ----------------------------PWD--------------------------------
 1- pwd
 2- pwd hello

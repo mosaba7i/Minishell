@@ -263,7 +263,7 @@ char *get_expand_value(char *var, t_shell *shell)
 {
 	char *value;
 
-	if (var[0] == '$' && !ft_isalpha(var[1]))
+	if (var[0] == '$' && !ft_isalpha(var[1]) && var[1] != '_')
 		value = get_num(var, shell);
 	else if (var[0] == '~')
 		get_tilde_value(var, &value, shell);
