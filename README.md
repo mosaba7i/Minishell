@@ -37,7 +37,7 @@ make
 
 ### [Bash Redirection Explained With Examples by revWhiteShadow](https://itsfoss.gitlab.io/post/bash-redirection-explained-with-examples/)
 
-### [What happens when you type a command in the terminal?] (https://www.youtube.com/watch?v=EEvY9pptM5Q)
+### [What happens when you type a command in the terminal?](https://www.youtube.com/watch?v=EEvY9pptM5Q)
 
 ### AI
 

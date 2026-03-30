@@ -16,6 +16,7 @@ void search_tilde(t_command *cmds, t_shell *shell, int i);
 char *get_num(char *var, t_shell *shell);
 void shift_args(char **arg_lst, int index);
 void print_args(char **args);
+char *get_expand_value(char *var, t_shell *shell);
 
 void check_env_expansion(t_command *cmds, t_shell *shell)
 {
@@ -245,17 +246,7 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	char *new_arg;
 	int new_len;
 
-	if (var[0] == '$' && !ft_isalpha(var[1]))
-		env_value = get_num(var, shell);
-	else if (var[0] == '~')
-		get_tilde_value(var, &env_value, shell);
-	else
-		env_value = ft_strdup(get_env_value(shell, var + 1));
-	if (!env_value)
-	{
-		free(var);
-		print_error_free(shell, "minishell: malloc");
-	}
+	env_value = get_expand_value(var, shell);
 	new_len = get_new_arg_len(*arg, var, env_value);
 	new_arg = ft_calloc(new_len + 1, sizeof(char));
 	if (!new_arg)
@@ -266,6 +257,30 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	replace_var(new_arg, env_value, *arg, var);
 	free_pointers(3, *arg, var, env_value);
 	*arg = new_arg;
+}
+
+char *get_expand_value(char *var, t_shell *shell)
+{
+	char *value;
+
+	if (var[0] == '$' && !ft_isalpha(var[1]))
+		value = get_num(var, shell);
+	else if (var[0] == '~')
+		get_tilde_value(var, &value, shell);
+	else
+	{
+		value = get_env_value(shell, var + 1);
+		if (!value) // if the variable doesn't exist in env, we replace it with empty string
+			value = ft_strdup("");
+		else
+			value = ft_strdup(value);
+	}
+	if (!value) // malloc fail
+	{
+		free(var);
+		print_error_free(shell, "minishell: malloc");
+	}
+	return (value);
 }
 
 char *get_num(char *var, t_shell *shell)
@@ -279,16 +294,20 @@ char *get_num(char *var, t_shell *shell)
 
 void get_tilde_value(char *var, char **env_value, t_shell *shell)
 {
+	char *temp;
 	if (var[1] == '\0' || var[1] == '/' || var[1] == ':')
-		*env_value = ft_strdup(get_env_value(shell, "HOME"));
+		temp = get_env_value(shell, "HOME");
 	else if ((var[1] == '+' || var[1] == '0') && (var[2] == '\0' || var[2] == '/' || var[2] == ':'))
-		*env_value = ft_strdup(get_env_value(shell, "PWD"));
+		temp = get_env_value(shell, "PWD");
 	else if (var[1] == '-' && (var[2] == '\0' || var[2] == '/' || var[2] == ':'))
-		*env_value = ft_strdup(get_env_value(shell, "OLDPWD"));
+		temp = get_env_value(shell, "OLDPWD");
 	else if (ft_strcmp(var + 1, get_env_value(shell, "USER")) == 0)
-		*env_value = ft_strdup(get_env_value(shell, "HOME"));
+		temp = get_env_value(shell, "HOME");
 	else
-		*env_value = ft_strdup(var);
+		temp = var;
+	if (!temp)
+		temp = "";
+	*env_value = ft_strdup(temp);
 }
 
 void replace_var(char *new_arg, char *env_value, char *arg, char *var)

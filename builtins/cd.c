@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 15:38:10 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/29 15:10:39 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/30 14:05:28 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,9 +94,9 @@ int ft_cd(t_shell *shell, t_command *cmd)
         path = get_env_value(shell, "HOME");
     else
         path = cmd->arg_lst[1];
-    if (ft_strlen(path) == 0)
+    if (path && ft_strlen(path) == 0)
         path = ".";
-    if (ft_strcmp(path, "-") == 0)
+    else if (ft_strcmp(path, "-") == 0)
         path = get_env_value(shell, "OLDPWD");
     if (chdir(path) != 0)
     {

@@ -6,7 +6,7 @@
 /*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/29 13:28:20 by lalkhati          #+#    #+#             */
-/*   Updated: 2026/03/29 15:20:44 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/03/30 14:15:34 by lalkhati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ int main(int argc, char **argv, char **envp)
 	while (1)
 	{
 		pwd = get_env_value(shell, "PWD");
+		if (!pwd)
+			pwd = "minishell";
 		prompt = ft_strjoin(pwd, "$ ");
 		initsig_prompt();
 		inpt_line = readline(prompt);
@@ -77,6 +79,10 @@ int ft_strcmp(const char *s1, const char *s2)
 	size_t i;
 
 	i = 0;
+	if (!s1 && !s2)
+		return (0);
+	if (!s1 || !s2)
+		return (1);
 	while ((unsigned char)s1[i] != '\0' && (unsigned char)s2[i] == (unsigned char)s1[i])
 		i++;
 	return ((unsigned char)s1[i] - (unsigned char)s2[i]);
