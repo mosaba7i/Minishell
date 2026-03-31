@@ -28,8 +28,9 @@
 #include <stdarg.h>			   // va_list, va_start, va_arg, va_end
 #include "./libft/libft.h"
 #include "./fprintf/ft_fprintf.h"
-#include <limits.h> // PATH_MAX, LONG_MAX, LONG_MIN
-#include <errno.h>	// errno, perror, strerror
+#include <limits.h>	  // PATH_MAX, LONG_MAX, LONG_MIN
+#include <errno.h>	  // errno, perror, strerror
+#include <sys/stat.h> // stat
 /*ext func like readline can be installed with
 sudo apt-get update
 sudo apt-get install libreadline-dev
@@ -144,5 +145,6 @@ void free_tokens(t_token *head);
 void *free_all(t_token *tokens, t_command *cmds);
 char *get_env_value(t_shell *shell, char *key);
 void set_env_value(t_shell *shell, char *key, char *value);
+int is_path_directory(const char *path);
 
 #endif

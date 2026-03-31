@@ -17,6 +17,7 @@ char *get_num(char *var, t_shell *shell);
 void shift_args(char **arg_lst, int index);
 void print_args(char **args);
 char *get_expand_value(char *var, t_shell *shell);
+static char *get_env_expand_value(char *var, t_shell *shell);
 
 void check_env_expansion(t_command *cmds, t_shell *shell)
 {
@@ -259,6 +260,32 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	*arg = new_arg;
 }
 
+// char *get_expand_value(char *var, t_shell *shell)
+// {
+// 	char *value;
+
+// 	if (var[0] == '$' && !ft_isalpha(var[1]) && var[1] != '_')
+// 		value = get_num(var, shell);
+// 	else if (var[0] == '~')
+// 		get_tilde_value(var, &value, shell);
+// 	else
+// 	{
+// 		value = get_env_value(shell, var + 1);
+// 		if (!value) // if the variable doesn't exist in env, we replace it with empty string
+// 			value = ft_strdup("");
+// 		else if (ft_strcmp(var, "$_") == 0 && !is_path_directory(value))
+// 			value = ft_strdup(ft_strrchr(value, '/') + 1);
+// 		else
+// 			value = ft_strdup(value);
+// 	}
+// 	if (!value) // malloc fail
+// 	{
+// 		free(var);
+// 		print_error_free(shell, "minishell: malloc");
+// 	}
+// 	return (value);
+// }
+
 char *get_expand_value(char *var, t_shell *shell)
 {
 	char *value;
@@ -268,21 +295,37 @@ char *get_expand_value(char *var, t_shell *shell)
 	else if (var[0] == '~')
 		get_tilde_value(var, &value, shell);
 	else
-	{
-		value = get_env_value(shell, var + 1);
-		if (!value) // if the variable doesn't exist in env, we replace it with empty string
-			value = ft_strdup("");
-		else if (var[0] == '$' && var[1] == '_' && var[2] == '\0' && ft_strchr(value, '/'))
-			value = ft_strdup(ft_strrchr(value, '/') + 1);
-		else
-			value = ft_strdup(value);
-	}
-	if (!value) // malloc fail
+		value = get_env_expand_value(var, shell);
+	if (!value)
 	{
 		free(var);
 		print_error_free(shell, "minishell: malloc");
 	}
 	return (value);
+}
+
+static char *get_env_expand_value(char *var, t_shell *shell)
+{
+	char *value;
+	char *env_value;
+
+	env_value = get_env_value(shell, var + 1);
+	if (!env_value)
+		return (ft_strdup(""));
+	if (ft_strcmp(var, "$_") == 0 && !is_path_directory(env_value))
+		return (ft_strdup(ft_strrchr(env_value, '/') + 1));
+	value = ft_strdup(env_value);
+	return (value);
+}
+
+int is_path_directory(const char *path)
+{
+	struct stat stats;
+
+	if (stat(path, &stats) == 0 && S_ISDIR(stats.st_mode))
+		return 1;
+
+	return 0;
 }
 
 char *get_num(char *var, t_shell *shell)

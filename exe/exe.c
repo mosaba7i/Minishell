@@ -130,7 +130,10 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	}
 	execve(full_path, command->arg_lst, env_list);
 	write(2, "minishell: ", 11);
-	perror(command->arg_lst[0]);
+	if (is_path_directory(full_path))
+		ft_fprintf(2, "%s: is a directory\n", full_path);
+	else
+		perror(command->arg_lst[0]);
 	if (errno == EACCES)
 		child_exit_cleanly(-1, -1, full_path, env_list, 126);
 	else if (errno == ENOENT)

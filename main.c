@@ -95,9 +95,9 @@ static void update_last_arg(t_command *cmd, t_shell *shell)
 		{
 			set_env_value(shell, "_", path);
 			free(path);
+			return;
 		}
-		else
-			set_env_value(shell, "_", cmd->arg_lst[i - 1]);
+		set_env_value(shell, "_", cmd->arg_lst[i - 1]);
 	}
 }
 
