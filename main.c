@@ -90,10 +90,13 @@ static void update_last_arg(t_command *cmd, t_shell *shell)
 		i++;
 	if (i > 0)
 	{
-		path = get_cmd_path(shell, cmd->arg_lst[0]);
-		if (path)
+		if (i == 1)
 		{
-			set_env_value(shell, "_", path);
+			path = get_cmd_path(shell, cmd->arg_lst[0]);
+			if (path)
+				set_env_value(shell, "_", path);
+			else
+				set_env_value(shell, "_", cmd->arg_lst[0]);
 			free(path);
 			return;
 		}

@@ -312,7 +312,7 @@ static char *get_env_expand_value(char *var, t_shell *shell)
 	env_value = get_env_value(shell, var + 1);
 	if (!env_value)
 		return (ft_strdup(""));
-	if (ft_strcmp(var, "$_") == 0 && !is_path_directory(env_value))
+	if (ft_strcmp(var, "$_") == 0 && ft_strrchr(env_value, '/') && !is_path_directory(env_value))
 		return (ft_strdup(ft_strrchr(env_value, '/') + 1));
 	value = ft_strdup(env_value);
 	return (value);
