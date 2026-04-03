@@ -25,7 +25,7 @@ make
 
 # Resources
 
-### [GNU Bash Manual] (https://www.gnu.org/software/bash/manual/bash.html)
+### [GNU Bash Manual](https://www.gnu.org/software/bash/manual/bash.html)
 
 ### [Minishell: Building a mini-bash by zlaarous](https://medium.com/@zouhairlrs/minishell-building-a-mini-bash-a-42-project-5dc20d671fbb)
 
