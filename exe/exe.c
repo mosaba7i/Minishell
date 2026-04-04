@@ -162,6 +162,8 @@ static int restore_stdio(int saved_stdin, int saved_stdout)
 	return (restore_failed);
 }
 
+// TODO: When we input exit, the program exits without reaching restore_stdio, so 2 extra fds
+// remain open. run valgrind with  --track-fds=yes to check (it report 5 open, 3 of them stds and 2 of them the extra fds).
 static int run_builtin_in_parent(t_shell *shell, t_command *command)
 {
 	int saved_stdin;

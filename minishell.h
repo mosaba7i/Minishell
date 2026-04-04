@@ -137,7 +137,7 @@ int handle_heredoc(t_command *cmds, t_shell *shell);
 t_token *tokenize(char *input, t_shell *shell);
 int is_white_space(char c);
 void assign_null(int num, ...);
-void check_env_expansion(t_command *cmds, t_shell *shell);
+int check_env_expansion(t_command *cmds, t_shell *shell);
 void handle_quotes(t_command *cmds, t_shell *shell);
 void print_error_free(t_shell *shell, const char *msg);
 int print_error_syntax(char *msg, char *str, t_shell *shell);
