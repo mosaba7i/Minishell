@@ -18,8 +18,12 @@ void shift_args(char **arg_lst, int index);
 void print_args(char **args);
 char *get_expand_value(char *var, t_shell *shell);
 static char *get_env_expand_value(char *var, t_shell *shell);
+void split_var(char *arg, t_command *current_cmd, int arg_index, t_shell *shell);
+int multiple_redirs_same_file(t_redir *redir);
+void search_var_redir(t_redir *redir, t_shell *shell);
+int expand_redir(t_redir *redirs, t_shell *shell);
 
-void check_env_expansion(t_command *cmds, t_shell *shell)
+int check_env_expansion(t_command *cmds, t_shell *shell)
 {
 	int i;
 
@@ -34,13 +38,29 @@ void check_env_expansion(t_command *cmds, t_shell *shell)
 				shift_args(cmds->arg_lst, i);
 				continue;
 			}
+			split_var(cmds->arg_lst[i], cmds, i, shell);
 			search_tilde(cmds, shell, i);
 			i++;
 		}
+		if (expand_redir(cmds->redirs, shell) == -1)
+			return (-1);
 		cmds = cmds->next;
 	}
+	return (0);
 }
 
+int expand_redir(t_redir *redirs, t_shell *shell)
+{
+
+	while (redirs)
+	{
+		search_var_redir(redirs, shell);
+		if (multiple_redirs_same_file(redirs))
+			return print_error_syntax("ambiguous redirect", redirs->file, shell);
+		redirs = redirs->next;
+	}
+	return (0);
+}
 // TODO: remove print_args before turn in
 void print_args(char **args)
 {
@@ -84,6 +104,54 @@ void search_var(t_command *cmds, t_shell *shell, int i)
 		}
 		pos = ft_strchr(pos + 1, '$');
 	}
+}
+
+void search_var_redir(t_redir *redir, t_shell *shell)
+{
+	char *pos;
+	char *var;
+
+	if (redir->type == HEREDOC)
+		return;
+	var = NULL;
+	pos = ft_strchr(redir->file, '$');
+	while (pos)
+	{
+		get_var(pos, &var, shell);
+		if (var && is_expandable(redir->file, var)) // we don't expand in heredoc redirs
+		{
+			expand_var(var, &redir->file, shell);
+			pos = ft_strchr(redir->file, '$'); // since we overwritten and freed arg, pos point to garbage
+			continue;
+		}
+		pos = ft_strchr(pos + 1, '$');
+	}
+}
+
+int multiple_redirs_same_file(t_redir *redir)
+{
+	int i;
+	char *file;
+	char quote;
+
+	if (redir->type == HEREDOC)
+		return (0);
+	i = 0;
+	file = redir->file;
+	quote = 0;
+	while (file[i])
+	{
+		if (file[i] == '\'' || file[i] == '\"')
+			quote = file[i];
+		else if (quote && file[i] == quote)
+			quote = 0;
+		else if (!quote && is_white_space(file[i]))
+			return (1);
+		i++;
+	}
+	if (i == 0)
+		return (1);
+	return (0);
 }
 
 void search_tilde(t_command *cmds, t_shell *shell, int i)
@@ -260,31 +328,133 @@ void expand_var(char *var, char **arg, t_shell *shell)
 	*arg = new_arg;
 }
 
-// char *get_expand_value(char *var, t_shell *shell)
-// {
-// 	char *value;
+int count_arg_list(char **arg_lst)
+{
+	int count = 0;
 
-// 	if (var[0] == '$' && !ft_isalpha(var[1]) && var[1] != '_')
-// 		value = get_num(var, shell);
-// 	else if (var[0] == '~')
-// 		get_tilde_value(var, &value, shell);
-// 	else
-// 	{
-// 		value = get_env_value(shell, var + 1);
-// 		if (!value) // if the variable doesn't exist in env, we replace it with empty string
-// 			value = ft_strdup("");
-// 		else if (ft_strcmp(var, "$_") == 0 && !is_path_directory(value))
-// 			value = ft_strdup(ft_strrchr(value, '/') + 1);
-// 		else
-// 			value = ft_strdup(value);
-// 	}
-// 	if (!value) // malloc fail
-// 	{
-// 		free(var);
-// 		print_error_free(shell, "minishell: malloc");
-// 	}
-// 	return (value);
-// }
+	while (arg_lst[count])
+		count++;
+	return (count);
+}
+
+void free_args(char **arg_lst)
+{
+	int i = 0;
+
+	while (arg_lst[i])
+	{
+		free(arg_lst[i]);
+		i++;
+	}
+	free(arg_lst);
+}
+
+static int count_splits(char *arg)
+{
+	int i;
+	int split;
+	char inside_quote;
+
+	i = 0;
+	split = 0;
+	inside_quote = 0;
+	while (arg[i])
+	{
+		if (!inside_quote && (arg[i] == '\'' || arg[i] == '"'))
+			inside_quote = arg[i];
+		else if (inside_quote && arg[i] == inside_quote)
+			inside_quote = 0;
+		else if (is_white_space(arg[i]) && !inside_quote)
+			split++;
+		i++;
+	}
+	return (split);
+}
+
+static int find_split_pos(char *arg, int start)
+{
+	int i;
+	char inside_quote;
+
+	i = start;
+	inside_quote = 0;
+	while (arg[i])
+	{
+		if (!inside_quote && (arg[i] == '\'' || arg[i] == '"'))
+			inside_quote = arg[i];
+		else if (inside_quote && arg[i] == inside_quote)
+			inside_quote = 0;
+		else if (is_white_space(arg[i]) && !inside_quote)
+			return (i);
+		i++;
+	}
+	return (i);
+}
+
+static void copy_before_split(char **new_lst, char **old_lst, int arg_index)
+{
+	int i;
+
+	i = 0;
+	while (i < arg_index)
+	{
+		new_lst[i] = ft_strdup(old_lst[i]);
+		i++;
+	}
+}
+
+static void copy_after_split(char **new_lst, char **old_lst, int old_i, int new_i)
+{
+	while (old_lst[old_i])
+	{
+		new_lst[new_i] = ft_strdup(old_lst[old_i]);
+		old_i++;
+		new_i++;
+	}
+	new_lst[new_i] = NULL;
+}
+
+static int fill_split_args(char **new_lst, char *arg, int new_i)
+{
+	int start;
+	int end;
+
+	start = 0;
+	while (arg[start])
+	{
+		while (arg[start] && is_white_space(arg[start]))
+			start++;
+		if (!arg[start])
+			break;
+		end = find_split_pos(arg, start);
+		new_lst[new_i] = ft_substr(arg, start, end - start);
+		new_i++;
+		start = end;
+	}
+	return (new_i);
+}
+
+void split_var(char *arg, t_command *current_cmd, int arg_index, t_shell *shell)
+{
+	char **new_arg_lst;
+	int old_count;
+	int split_count;
+	int new_i;
+
+	split_count = count_splits(arg);
+	if (split_count == 0)
+		return;
+	old_count = count_arg_list(current_cmd->arg_lst);
+	new_arg_lst = ft_calloc(old_count + split_count + 1, sizeof(char *));
+	if (!new_arg_lst)
+		print_error_free(shell, "minishell: malloc");
+	copy_before_split(new_arg_lst, current_cmd->arg_lst, arg_index);
+	new_i = arg_index;
+	new_i = fill_split_args(new_arg_lst, arg, new_i);
+	copy_after_split(new_arg_lst, current_cmd->arg_lst, arg_index + 1, new_i);
+	free_args(current_cmd->arg_lst);
+	current_cmd->arg_lst = new_arg_lst;
+}
 
 char *get_expand_value(char *var, t_shell *shell)
 {

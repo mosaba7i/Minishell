@@ -25,7 +25,7 @@ make
 
 # Resources
 
-### [GNU Bash Manual] (https://www.gnu.org/software/bash/manual/bash.html)
+### [GNU Bash Manual](https://www.gnu.org/software/bash/manual/bash.html)
 
 ### [Minishell: Building a mini-bash by zlaarous](https://medium.com/@zouhairlrs/minishell-building-a-mini-bash-a-42-project-5dc20d671fbb)
 
@@ -38,6 +38,8 @@ make
 ### [Bash Redirection Explained With Examples by revWhiteShadow](https://itsfoss.gitlab.io/post/bash-redirection-explained-with-examples/)
 
 ### [What happens when you type a command in the terminal?](https://www.youtube.com/watch?v=EEvY9pptM5Q)
+
+### [**LINUX.ORG** BASH 03 – Command-line Processing by Jarret B](https://www.linux.org/threads/bash-03-%E2%80%93-command-line-processing.38676/)
 
 ### AI
 

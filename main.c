@@ -12,6 +12,8 @@
 
 #include "minishell.h"
 
+extern int g_sign;
+
 void print_tokens(t_token *head);
 void debug_print_heredocs(t_redir *redir_list);
 void free_commands(t_command *head);
@@ -34,13 +36,15 @@ int main(int argc, char **argv, char **envp)
 
 	while (1)
 	{
+		initsig_prompt();
 		pwd = get_env_value(shell, "PWD");
 		if (!pwd)
 			pwd = "minishell";
 		prompt = ft_strjoin(pwd, "$ ");
-		initsig_prompt();
 		inpt_line = readline(prompt);
 		free(prompt);
+		if (g_sign == 2)
+			shell->exit_status = 130;
 		if (!inpt_line) // ctrl+D
 			ft_exit(shell, NULL);
 		if (*inpt_line)
@@ -60,7 +64,12 @@ int main(int argc, char **argv, char **envp)
 		}
 		// print_heredocs(cmds);
 
-		check_env_expansion(cmds, shell);
+		if (check_env_expansion(cmds, shell) == -1)
+		{
+			shell->exit_status = 1;
+			free_all(tokens, cmds);
+			continue;
+		}
 		// printf("after expansion: \n");
 		// print_commands(cmds);
 

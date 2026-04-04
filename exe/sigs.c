@@ -12,29 +12,29 @@
 
 #include "../minishell.h"
 
-int sign;
+int g_sign;
 
-static void	hand_sigint(int sig)
+static void hand_sigint(int sig)
 {
-	sign = sig;
+	g_sign = sig;
 	write(1, "\n", 1);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
 }
 
-static void	hand_sigint_heredoc(int sig)
+static void hand_sigint_heredoc(int sig)
 {
 	(void)sig;
 	write(1, "\n", 1);
 	exit(130);
 }
 
-void	initsig_prompt(void)
+void initsig_prompt(void)
 {
-	struct sigaction	sa;
+	struct sigaction sa;
 
-	sign = 0;
+	g_sign = 0;
 	sa.sa_handler = hand_sigint;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
@@ -43,17 +43,17 @@ void	initsig_prompt(void)
 	sigaction(SIGQUIT, &sa, NULL);
 }
 
-void	initsig_child(void)
+void initsig_child(void)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 }
 
-void	initsig_heredoc(void)
+void initsig_heredoc(void)
 {
-	struct sigaction	sa;
+	struct sigaction sa;
 
-	sign = 0;
+	g_sign = 0;
 	sa.sa_handler = hand_sigint_heredoc;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;

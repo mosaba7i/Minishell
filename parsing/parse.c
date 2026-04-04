@@ -71,7 +71,7 @@ int print_error_syntax(char *msg, char *str, t_shell *shell)
 	else
 		ft_fprintf(2, "syntax error near unexpected token `%s'", str);
 	write(2, "\n", 1);
-	return (-1); // TODO: check exit code
+	return (-1);
 }
 
 t_command *new_command(t_shell *shell)
