@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exe.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
+/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 00:00:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/29 20:23:33 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/04/04 02:25:12 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ static int wait_for_everything(pid_t last_child)
 		finished_pid = wait(&status);
 	}
 	return (final_status);
-	return (final_status);
 }
 
 static void child_exit_cleanly(int input_fd, int output_fd,
@@ -110,11 +109,12 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	{
 		if (ft_strchr(command->arg_lst[0], '/'))
 		{
+			int saved_errno = errno;
 			write(2, "minishell: ", 11);
 			perror(command->arg_lst[0]);
-			if (errno == ENOENT)
+			if (saved_errno == ENOENT)
 				child_exit_cleanly(-1, -1, full_path, env_list, 127);
-			else if (errno == EACCES)
+			else if (saved_errno == EACCES)
 				child_exit_cleanly(-1, -1, full_path, env_list, 126);
 		}
 		else
@@ -129,14 +129,15 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 		child_exit_cleanly(-1, -1, full_path, env_list, 1);
 	}
 	execve(full_path, command->arg_lst, env_list);
+	int saved_errno = errno;
 	write(2, "minishell: ", 11);
 	if (is_path_directory(full_path))
 		ft_fprintf(2, "%s: is a directory\n", full_path);
 	else
 		perror(command->arg_lst[0]);
-	if (errno == EACCES)
+	if (saved_errno == EACCES)
 		child_exit_cleanly(-1, -1, full_path, env_list, 126);
-	else if (errno == ENOENT)
+	else if (saved_errno == ENOENT)
 		child_exit_cleanly(-1, -1, full_path, env_list, 127);
 	child_exit_cleanly(-1, -1, full_path, env_list, 1);
 }

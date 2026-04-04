@@ -6,7 +6,7 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 18:40:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/12 12:31:27 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/04/04 02:25:12 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,13 @@ int	ft_echo(char **args)
 	}
 	while (args[i])
 	{
-		printf("%s", args[i]);
+		write(1, args[i], ft_strlen(args[i]));
 		if (args[i + 1])
-			printf(" ");
+			write(1, " ", 1);
 		i++;
 	}
 	if (newline)
-		printf("\n");
+		write(1, "\n", 1);
 	return (0);
 }
 
