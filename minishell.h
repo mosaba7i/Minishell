@@ -16,10 +16,6 @@
 #define TRUE 1
 #define FALSE 0
 
-#define X_SQUOTE '\x1D'
-#define X_DQUOTE '\x1E'
-#define X_DOLLAR '\x1F'
-
 #include <readline/readline.h> // readlinne (ext fun)
 #include <readline/history.h>  // add_history, rl_clear_history, rl_on_new_line, rl_replace_line, rl_redisplay (ext func)
 #include <stdio.h>			   // printf, perror, strerror

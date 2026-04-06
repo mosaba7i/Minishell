@@ -129,18 +129,6 @@
 5- >>>> >> >> >>
 6- > > > >
 
-----------------------------EXPORT------------------------------
-1- export $EMPTY
-2- export $?
-3- export ""
-4- export =
-5- export %
-6- export ?=2
-7- export 9HOLA=
-8- export HOL@=bonjour
-9- export HOL\~A=bonjour
-10- export HOLA-=bonjour
-11- 
 ----------------------------MISC--------------------------------
 1- /
 2- //
@@ -152,13 +140,7 @@
 8- echo-n
 9- >echo>
 10- |echo -n hola
-11- e'cho hola'
-12- export HO-LA=bonjour
-13- export HOL.A=bonjour
-14- export HOL}A=bonjour
-15- export HOL{A=bonjour
-16- export HOLA=$HOME
-
+11-  e'cho hola'
 ----------------------------COMPOUND---------------------------
 1- 
 echo $PWD 
@@ -189,19 +171,6 @@ echo " $ " | cat -e
 10-
 export var="a b c"
 << $var
-11-
-export | grep "HOME"
-12-
-export HOLA="   -n bonjour
-echo $HOLA
-13-
-export HOLA=at
-c$HOLA Makefile
-14-
-$> export HOLA="cat Makefile | grep NAME"  
-$> echo $HOLA
-15-
-
 
 
 
