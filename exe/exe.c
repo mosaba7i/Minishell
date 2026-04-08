@@ -78,6 +78,22 @@ static void child_exit_cleanly(int input_fd, int output_fd,
 	exit(exit_code);
 }
 
+void print_cmd_not_found(char *cmd)
+{
+	char *tmp;
+	char *msg;
+
+	tmp = ft_strjoin(cmd, ": ");
+	if (!tmp)
+		return;
+	msg = ft_strjoin(tmp, "command not found\n");
+	free(tmp);
+	if (!msg)
+		return;
+	write(2, msg, ft_strlen(msg));
+	free(msg);
+}
+
 static void run_command_in_child(t_shell *shell, t_command *command,
 								 int input_fd, int output_fd)
 {
@@ -118,7 +134,7 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 				child_exit_cleanly(-1, -1, full_path, env_list, 126);
 		}
 		else
-			ft_fprintf(2, "%s: command not found\n", command->arg_lst[0]);
+			print_cmd_not_found(command->arg_lst[0]);
 		child_exit_cleanly(-1, -1, full_path, env_list, 127);
 	}
 	env_list = env_to_array(shell->env);
@@ -132,7 +148,7 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	int saved_errno = errno;
 	write(2, "minishell: ", 11);
 	if (is_path_directory(full_path))
-		ft_fprintf(2, "%s: is a directory\n", full_path);
+		ft_fprintf(2, "%s: Is a directory\n", full_path);
 	else
 		perror(command->arg_lst[0]);
 	if (saved_errno == EACCES)

@@ -19,7 +19,8 @@ int pwd(void)
     cwd = getcwd(NULL, 0);
     if (!cwd)
     {
-        perror("pwd");
+        ft_fprintf(2, "pwd: error retrieving current directory: %s\n",
+			strerror(errno));
         return (1);
     }
     printf("%s\n", cwd);

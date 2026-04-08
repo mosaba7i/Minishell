@@ -12,8 +12,6 @@
 
 #include "../minishell.h"
 
-static long long ft_atol(const char *str, int *overflow);
-static int is_valid_num(char *str_num);
 static int check_args(char **args, int *exit_code);
 
 int ft_exit(t_shell *shell, char **args)
@@ -57,22 +55,22 @@ static int check_args(char **args, int *exit_code)
 	return (0);
 }
 
-static long long ft_atol(const char *str, int *overflow)
+long long ft_atol(const char *str, int *overflow)
 {
 	int minus;
 	long long result;
 
+	if (!str)
+		return (0);
 	minus = 1;
 	result = 0;
 	while (*str == ' ' || (*str >= 9 && *str <= 13))
 		str++;
-	if (*str == '-')
+	if (*str == '-' || *str == '+')
 	{
-		minus *= -1;
+		minus *= (44 - *str);
 		str++;
 	}
-	else if (*str == '+')
-		str++;
 	while (*str >= '0' && *str <= '9')
 	{
 		if (result > LONG_MAX / 10 || -result < LONG_MIN / 10)
@@ -86,21 +84,25 @@ static long long ft_atol(const char *str, int *overflow)
 	return (result * minus);
 }
 
-static int is_valid_num(char *str_num)
+int is_valid_num(char *str_num)
 {
 	int i;
 
-	i = 0;
-	if (str_num[0] == '-' || str_num[0] == '+')
-		i++;
-	if ((str_num[0] == '-' || str_num[0] == '+') && !str_num[1])
+	if (!str_num)
 		return (0);
-	while (str_num[i])
-	{
-		if (!ft_isdigit(str_num[i]))
-			return (0);
+	i = 0;
+	while (str_num[i] == ' ' || (str_num[i] >= 9 && str_num[i] <= 13))
 		i++;
-	}
+	if (str_num[i] == '-' || str_num[i] == '+')
+		i++;
+	if (!ft_isdigit(str_num[i]))
+		return (0);
+	while (ft_isdigit(str_num[i]))
+		i++;
+	while (str_num[i] == ' ' || (str_num[i] >= 9 && str_num[i] <= 13))
+		i++;
+	if (str_num[i] != '\0')
+		return (0);
 	return (1);
 }
 

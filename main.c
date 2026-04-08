@@ -130,8 +130,12 @@ int ft_strcmp(const char *s1, const char *s2)
 void print_error_free(t_shell *shell, const char *msg)
 {
 	perror(msg);
-	free_all(shell->ptrs->tokens, shell->ptrs->commands);
-	free_env(shell);
+	if (shell)
+	{
+		if (shell->ptrs)
+			free_all(shell->ptrs->tokens, shell->ptrs->commands);
+		free_env(shell);
+	}
 	rl_clear_history();
 	if (errno)
 		exit(errno);

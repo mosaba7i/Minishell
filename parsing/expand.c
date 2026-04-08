@@ -22,6 +22,7 @@ void split_var(char *arg, t_command *current_cmd, int arg_index, t_shell *shell)
 int multiple_redirs_same_file(t_redir *redir);
 void search_var_redir(t_redir *redir, t_shell *shell);
 int expand_redir(t_redir *redirs, t_shell *shell);
+void substitute_expand_char(char *env_value);
 
 int check_env_expansion(t_command *cmds, t_shell *shell)
 {
@@ -323,9 +324,27 @@ void expand_var(char *var, char **arg, t_shell *shell)
 		free_pointers(2, var, env_value);
 		print_error_free(shell, "minishell: malloc");
 	}
+	substitute_expand_char(env_value);
 	replace_var(new_arg, env_value, *arg, var);
 	free_pointers(3, *arg, var, env_value);
 	*arg = new_arg;
+}
+
+void substitute_expand_char(char *env_value)
+{
+	int i;
+
+	i = 0;
+	while (env_value[i])
+	{
+		if (env_value[i] == '\'')
+			env_value[i] = X_SQUOTE;
+		else if (env_value[i] == '\"')
+			env_value[i] = X_DQUOTE;
+		else if (env_value[i] == '$')
+			env_value[i] = X_DOLLAR;
+		i++;
+	}
 }
 
 int count_arg_list(char **arg_lst)
@@ -500,7 +519,9 @@ int is_path_directory(const char *path)
 
 char *get_num(char *var, t_shell *shell)
 {
-	if (var[0] == '$' && var[1] >= '0' && var[1] <= '9')
+	if (ft_strcmp(var, "$0") == 0)
+		return (ft_strdup("minishell"));
+	else if (var[0] == '$' && var[1] >= '1' && var[1] <= '9')
 		return (ft_strdup(""));
 	else if (var[1] == '?')
 		return (ft_itoa(shell->exit_status));
@@ -548,10 +569,20 @@ void replace_var(char *new_arg, char *env_value, char *arg, char *var)
 			arg += ft_strlen(var) - 1;
 		}
 		else
-			new_arg[i] = (*arg);
+			new_arg[i] = *arg;
 		arg++;
 		i++;
 	}
+}
+char get_expand_char(char c)
+{
+	if (c == '\'')
+		return (X_SQUOTE);
+	else if (c == '\"')
+		return (X_DQUOTE);
+	else if (c == '$')
+		return (X_DOLLAR);
+	return (c);
 }
 
 void free_pointers(const int pointer_count, ...)
