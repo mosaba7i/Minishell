@@ -117,6 +117,8 @@
 57- echo "''h'o'la''"
 58- echo"'hola'"
 59- echo '''ho"''''l"a'''
+60- echo $$USER
+61- echo $$$$HOME
 
 ----------------------------PWD--------------------------------
 1- pwd
@@ -133,7 +135,7 @@
 4- <<
 5- >>>> >> >> >>
 6- > > > >
-
+7- "'"'""'"'"
 ----------------------------EXPORT------------------------------
 1- export $EMPTY
 2- export $?
@@ -206,6 +208,30 @@ c$HOLA Makefile
 $> export HOLA="cat Makefile | grep NAME"  
 $> echo $HOLA
 15-
+export USER='$USER'
+echo $USER
+export $USER='$USER'
+16-
+<< "" cat
+17-
+<< $var""cat (doesn't expand)
+18- 
+<< eof"
+19-
+export a="c d"
+export f=$a $a
+20-
+yes
+ctrl c
+Ctrl \
+21-
+cat
+ctrl c
+ctrl \
+22- 
+sleep 3 | sleep 3 | sleep 3
+ctrl c
+ctrl \ 
 
 
 

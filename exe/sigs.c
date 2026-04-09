@@ -17,10 +17,21 @@ int g_sign;
 static void hand_sigint(int sig)
 {
 	g_sign = sig;
+
 	write(1, "\n", 1);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
+}
+
+static void hand_sig_parent(int sig)
+{
+	g_sign = sig;
+	if (sig == SIGINT)
+		write(1, "\n", 1);
+	else if (sig == SIGQUIT)
+		ft_fprintf(1, "Quit: (core dumped) \n");
+	rl_on_new_line();
 }
 
 static void hand_sigint_heredoc(int sig)
@@ -40,6 +51,18 @@ void initsig_prompt(void)
 	sa.sa_flags = SA_RESTART;
 	sigaction(SIGINT, &sa, NULL);
 	sa.sa_handler = SIG_IGN;
+	sigaction(SIGQUIT, &sa, NULL);
+}
+
+void initsig_parent(void)
+{
+	struct sigaction sa;
+
+	g_sign = 0;
+	sa.sa_handler = hand_sig_parent;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGQUIT, &sa, NULL);
 }
 

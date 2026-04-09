@@ -4,7 +4,6 @@ int count_quotes(char *arg);
 void get_quotes(char **arg, char **quote_pos);
 int is_quote(char *pos, char **quote_pos);
 char *remove_quotes(char **arg, char **quote_pos, t_shell *shell);
-void search_remove_quotes(char **arg, t_shell *shell);
 void resubstitute_expand_char(char **arg);
 
 void handle_quotes(t_command *cmds, t_shell *shell)

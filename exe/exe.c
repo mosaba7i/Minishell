@@ -65,7 +65,7 @@ static int wait_for_everything(pid_t last_child)
 }
 
 static void child_exit_cleanly(int input_fd, int output_fd,
-							   char *full_path, char **env_list, int exit_code)
+							   char *full_path, char **env_list, t_shell *shell, int exit_code)
 {
 	if (input_fd != -1 && input_fd != STDIN_FILENO)
 		close(input_fd);
@@ -75,6 +75,11 @@ static void child_exit_cleanly(int input_fd, int output_fd,
 		free(full_path);
 	if (env_list)
 		free_strs(env_list);
+	if (shell)
+	{
+		free_all(shell->ptrs->tokens, shell->ptrs->commands);
+		free_env(shell);
+	}
 	exit(exit_code);
 }
 
@@ -83,6 +88,11 @@ void print_cmd_not_found(char *cmd)
 	char *tmp;
 	char *msg;
 
+	if (ft_strcmp(cmd, "") == 0)
+	{
+		write(2, " '' : command not found\n", 24);
+		return;
+	}
 	tmp = ft_strjoin(cmd, ": ");
 	if (!tmp)
 		return;
@@ -106,19 +116,19 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	if (input_fd != -1 && redirect_fd(input_fd, STDIN_FILENO) == -1)
 	{
 		perror("minishell: dup2");
-		child_exit_cleanly(input_fd, output_fd, full_path, env_list, 1);
+		child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
 	}
 	if (output_fd != -1 && redirect_fd(output_fd, STDOUT_FILENO) == -1)
 	{
 		perror("minishell: dup2");
-		child_exit_cleanly(input_fd, output_fd, full_path, env_list, 1);
+		child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
 	}
 	if (apply_redirs(command->redirs) == -1)
-		child_exit_cleanly(input_fd, output_fd, full_path, env_list, 1);
+		child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
 	if (!command->arg_lst || !command->arg_lst[0])
-		child_exit_cleanly(-1, -1, full_path, env_list, 0);
+		child_exit_cleanly(-1, -1, full_path, env_list, shell, 0);
 	if (is_builtin(command->arg_lst[0]))
-		child_exit_cleanly(-1, -1, full_path, env_list,
+		child_exit_cleanly(-1, -1, full_path, env_list, shell,
 						   exe_builtin(shell, command));
 	full_path = get_cmd_path(shell, command->arg_lst[0]);
 	if (!full_path)
@@ -129,20 +139,20 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 			write(2, "minishell: ", 11);
 			perror(command->arg_lst[0]);
 			if (saved_errno == ENOENT)
-				child_exit_cleanly(-1, -1, full_path, env_list, 127);
+				child_exit_cleanly(-1, -1, full_path, env_list, shell, 127);
 			else if (saved_errno == EACCES)
-				child_exit_cleanly(-1, -1, full_path, env_list, 126);
+				child_exit_cleanly(-1, -1, full_path, env_list, shell, 126);
 		}
 		else
 			print_cmd_not_found(command->arg_lst[0]);
-		child_exit_cleanly(-1, -1, full_path, env_list, 127);
+		child_exit_cleanly(-1, -1, full_path, env_list, shell, 127);
 	}
 	env_list = env_to_array(shell->env);
 
 	if (!env_list)
 	{
 		perror("minishell: env_to_array");
-		child_exit_cleanly(-1, -1, full_path, env_list, 1);
+		child_exit_cleanly(-1, -1, full_path, env_list, shell, 1);
 	}
 	execve(full_path, command->arg_lst, env_list);
 	int saved_errno = errno;
@@ -152,10 +162,10 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	else
 		perror(command->arg_lst[0]);
 	if (saved_errno == EACCES)
-		child_exit_cleanly(-1, -1, full_path, env_list, 126);
+		child_exit_cleanly(-1, -1, full_path, env_list, shell, 126);
 	else if (saved_errno == ENOENT)
-		child_exit_cleanly(-1, -1, full_path, env_list, 127);
-	child_exit_cleanly(-1, -1, full_path, env_list, 1);
+		child_exit_cleanly(-1, -1, full_path, env_list, shell, 127);
+	child_exit_cleanly(-1, -1, full_path, env_list, shell, 1);
 }
 
 static int restore_stdio(int saved_stdin, int saved_stdout)
@@ -216,6 +226,7 @@ int execute(t_shell *shell, t_command *command_list)
 	pid_t last_child;
 	int started_any_child;
 
+	initsig_parent();
 	if (!command_list)
 		return (0);
 	if (!command_list->next && command_list->arg_lst && is_builtin(command_list->arg_lst[0]))

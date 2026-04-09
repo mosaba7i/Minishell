@@ -1,15 +1,14 @@
 #include "../minishell.h"
 
-int is_expandable(char *arg, char *var);
-int inside_single_qoutes(char *arg, char *var_pos);
-int is_var_between(char **start_quote, char **end_quote, char *var);
+int is_expandable(char *arg, char *var, char **var_pos);
+int inside_single_qoutes(char *arg, char **var_pos);
+int is_var_between(char **start_quote, char **end_quote, char **var_pos);
 void get_var(char *var_pos, char **var, t_shell *shell);
 void free_pointers(const int pointer_count, ...);
 void replace_var(char *new_arg, char *env_value, char *arg, char *var);
-void expand_var(char *var, char **arg, t_shell *shell);
 int get_new_arg_len(char *arg, char *var, char *env_value);
 void search_var(t_command *cmds, t_shell *shell, int i);
-int inside_qoutes(char *arg, char *var);
+int inside_qoutes(char *arg, char **var_pos);
 int is_tilde(char *var);
 void get_tilde_value(char *var, char **env_value, t_shell *shell);
 void search_tilde(t_command *cmds, t_shell *shell, int i);
@@ -23,6 +22,7 @@ int multiple_redirs_same_file(t_redir *redir);
 void search_var_redir(t_redir *redir, t_shell *shell);
 int expand_redir(t_redir *redirs, t_shell *shell);
 void substitute_expand_char(char *env_value);
+void check_export(t_command *cmds, t_shell *shell);
 
 int check_env_expansion(t_command *cmds, t_shell *shell)
 {
@@ -31,6 +31,7 @@ int check_env_expansion(t_command *cmds, t_shell *shell)
 	while (cmds)
 	{
 		i = 0;
+		check_export(cmds, shell);
 		while (cmds->arg_lst[i])
 		{
 			search_var(cmds, shell, i);
@@ -96,10 +97,15 @@ void search_var(t_command *cmds, t_shell *shell, int i)
 	pos = ft_strchr(cmds->arg_lst[i], '$');
 	while (pos)
 	{
-		get_var(pos, &var, shell);
-		if (var && is_expandable(cmds->arg_lst[i], var))
+		if (*(pos + 1) == '$')
 		{
-			expand_var(var, &cmds->arg_lst[i], shell);
+			pos = pos + 1;
+			continue;
+		}
+		get_var(pos, &var, shell);
+		if (var && is_expandable(cmds->arg_lst[i], var, &pos))
+		{
+			expand_var(var, &cmds->arg_lst[i], shell, 1);
 			pos = ft_strchr(cmds->arg_lst[i], '$'); // since we overwritten and freed arg, pos point to garbage
 			continue;
 		}
@@ -118,10 +124,15 @@ void search_var_redir(t_redir *redir, t_shell *shell)
 	pos = ft_strchr(redir->file, '$');
 	while (pos)
 	{
-		get_var(pos, &var, shell);
-		if (var && is_expandable(redir->file, var)) // we don't expand in heredoc redirs
+		if (*(pos + 1) == '$')
 		{
-			expand_var(var, &redir->file, shell);
+			pos = pos + 1;
+			continue;
+		}
+		get_var(pos, &var, shell);
+		if (var && is_expandable(redir->file, var, &pos)) // we don't expand in heredoc redirs
+		{
+			expand_var(var, &redir->file, shell, 1);
 			pos = ft_strchr(redir->file, '$'); // since we overwritten and freed arg, pos point to garbage
 			continue;
 		}
@@ -163,7 +174,7 @@ void search_tilde(t_command *cmds, t_shell *shell, int i)
 		return;
 	var = NULL;
 	get_var(cmds->arg_lst[i], &var, shell);
-	expand_var(var, &cmds->arg_lst[i], shell);
+	expand_var(var, &cmds->arg_lst[i], shell, 1);
 }
 
 void get_var(char *var_pos, char **var, t_shell *shell)
@@ -192,16 +203,16 @@ void get_var(char *var_pos, char **var, t_shell *shell)
 		print_error_free(shell, "minishell: malloc");
 }
 
-int is_expandable(char *arg, char *var)
+int is_expandable(char *arg, char *var, char **var_pos)
 {
-	if (!ft_strncmp(var, "$", 2) || inside_single_qoutes(arg, var)) // $ is on its own in the arg and is between single qoutes
+	if (!ft_strcmp(var, "$") || inside_single_qoutes(arg, var_pos)) // $ is on its own in the arg and is between single qoutes
 	{
 		free(var);
 		return (0);
 	}
 	if (!ft_strncmp(arg, var, ft_strlen(arg))) // var is on its own in the arg
 		return (1);
-	if (!ft_strncmp(var, "~", 1) && inside_qoutes(arg, var))
+	if (!ft_strncmp(var, "~", 1) && inside_qoutes(arg, var_pos))
 	{
 		free(var);
 		return (0);
@@ -225,7 +236,7 @@ int is_tilde(char *var)
 	return (0);
 }
 
-int inside_single_qoutes(char *arg, char *var)
+int inside_single_qoutes(char *arg, char **var_pos)
 {
 	char *start_quote;
 	char *end_quote;
@@ -243,7 +254,7 @@ int inside_single_qoutes(char *arg, char *var)
 				start_quote = arg;
 			else if (!end_quote)
 				end_quote = arg;
-			if (start_quote && end_quote && is_var_between(&start_quote, &end_quote, var))
+			if (start_quote && end_quote && is_var_between(&start_quote, &end_quote, var_pos))
 				return (1);
 			else if (start_quote && end_quote) // reset for next qoute, written in a cursed way for norm :)
 				assign_null(2, &start_quote, &end_quote);
@@ -253,7 +264,7 @@ int inside_single_qoutes(char *arg, char *var)
 	return (0);
 }
 
-int inside_qoutes(char *arg, char *var)
+int inside_qoutes(char *arg, char **var_pos)
 {
 	char *start_quote;
 	char *end_quote;
@@ -273,7 +284,7 @@ int inside_qoutes(char *arg, char *var)
 			inside_qoute = 0;
 			end_quote = arg;
 		}
-		if (start_quote && end_quote && is_var_between(&start_quote, &end_quote, var))
+		if (start_quote && end_quote && is_var_between(&start_quote, &end_quote, var_pos))
 			return (1);
 		else if (start_quote && end_quote)
 			assign_null(2, &start_quote, &end_quote);
@@ -282,13 +293,13 @@ int inside_qoutes(char *arg, char *var)
 	return (0);
 }
 
-// we send pointer to pointer since we want to search position betwen current quotes only.
-int is_var_between(char **start_quote, char **end_quote, char *var)
+int is_var_between(char **start_quote, char **end_quote, char **var_pos)
 {
-	char *exists;
-
-	exists = ft_strnstr(*start_quote, var, *end_quote - *start_quote);
-	if (exists)
+	if (*start_quote == *end_quote)
+		return (0);
+	if (*var_pos < *start_quote || *var_pos > *end_quote)
+		return (0);
+	else if (*var_pos > *start_quote && *var_pos < *end_quote)
 		return (1);
 	return (0);
 }
@@ -310,7 +321,7 @@ void assign_null(int num, ...)
 	va_end(arguments);
 }
 
-void expand_var(char *var, char **arg, t_shell *shell)
+void expand_var(char *var, char **arg, t_shell *shell, int substitue)
 {
 	char *env_value;
 	char *new_arg;
@@ -324,7 +335,8 @@ void expand_var(char *var, char **arg, t_shell *shell)
 		free_pointers(2, var, env_value);
 		print_error_free(shell, "minishell: malloc");
 	}
-	substitute_expand_char(env_value);
+	if (substitue)
+		substitute_expand_char(env_value);
 	replace_var(new_arg, env_value, *arg, var);
 	free_pointers(3, *arg, var, env_value);
 	*arg = new_arg;
@@ -609,4 +621,44 @@ int get_new_arg_len(char *arg, char *var, char *env_value)
 	else
 		new_len = ft_strlen(arg) - ft_strlen(var) + ft_strlen(env_value);
 	return (new_len + 1);
+}
+
+void add_qoutes(char *new_arg, char *pos_eq, char *arg, size_t len)
+{
+	size_t key_len;
+
+	key_len = pos_eq - arg + 1;			   // include '='
+	ft_strlcpy(new_arg, arg, key_len + 1); // VAR=
+	new_arg[key_len] = '"';
+	ft_strlcpy(new_arg + key_len + 1, pos_eq + 1, len - key_len + 1); // RHS
+	new_arg[len + 1] = '"';
+	new_arg[len + 2] = '\0';
+}
+
+void check_export(t_command *cmds, t_shell *shell)
+{
+	char *pos_eq;
+	char *new_arg;
+	int i;
+	size_t len;
+
+	if (!cmds->arg_lst[0] || ft_strcmp(cmds->arg_lst[0], "export") != 0)
+		return;
+	i = 0;
+	while (cmds->arg_lst[++i])
+	{
+		pos_eq = ft_strchr(cmds->arg_lst[i], '=');
+		if (!pos_eq || !*(pos_eq + 1) || !ft_strchr(pos_eq + 1, '$'))
+			continue;
+		len = ft_strlen(cmds->arg_lst[i]);
+		new_arg = malloc(len + 3);
+		if (!new_arg)
+		{
+			print_error_free(shell, "minishell: malloc");
+			return;
+		}
+		add_qoutes(new_arg, pos_eq, cmds->arg_lst[i], len);
+		free(cmds->arg_lst[i]);
+		cmds->arg_lst[i] = new_arg;
+	}
 }

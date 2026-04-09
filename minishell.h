@@ -135,6 +135,7 @@ int apply_redirs(t_redir *r);
 void initsig_child(void);
 void initsig_heredoc(void);
 void initsig_prompt(void);
+void initsig_parent(void);
 // parsing functions
 t_command *parse(t_token *tokens, t_shell *shell);
 int handle_heredoc(t_command *cmds, t_shell *shell);
@@ -152,5 +153,7 @@ void set_env_value(t_shell *shell, char *key, char *value);
 int is_path_directory(const char *path);
 int is_valid_num(char *str_num);
 long long ft_atol(const char *str, int *overflow);
+void search_remove_quotes(char **arg, t_shell *shell);
+void expand_var(char *var, char **arg, t_shell *shell, int substitute);
 
 #endif
