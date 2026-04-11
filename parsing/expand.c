@@ -99,6 +99,7 @@ void search_var(t_command *cmds, t_shell *shell, int i)
 	{
 		if (*(pos + 1) == '$')
 		{
+			*pos = X_DOLLAR;
 			pos = pos + 1;
 			continue;
 		}
@@ -207,6 +208,7 @@ int is_expandable(char *arg, char *var, char **var_pos)
 {
 	if (!ft_strcmp(var, "$") || inside_single_qoutes(arg, var_pos)) // $ is on its own in the arg and is between single qoutes
 	{
+		**var_pos = X_DOLLAR;
 		free(var);
 		return (0);
 	}
@@ -214,6 +216,7 @@ int is_expandable(char *arg, char *var, char **var_pos)
 		return (1);
 	if (!ft_strncmp(var, "~", 1) && inside_qoutes(arg, var_pos))
 	{
+		**var_pos = X_DOLLAR;
 		free(var);
 		return (0);
 	}

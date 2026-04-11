@@ -23,8 +23,7 @@ t_shell *init_shell(char **envp)
 	shell = malloc(sizeof(t_shell));
 	if (!shell)
 		print_error_free(NULL, "minishell: malloc");
-	shell->env = NULL;
-	shell->exit_status = 0;
+
 	init_pointers(shell);
 	lvl_str = NULL;
 	int i = 0;
@@ -32,18 +31,24 @@ t_shell *init_shell(char **envp)
 	{
 		if (ft_strncmp(envp[i], "SHLVL=", 6) == 0)
 			lvl_str = get_lvl(shell, envp[i]);
-		export_var(&shell->env, envp[i]);
+		if (export_var(&shell->env, envp[i]) == 2)
+			print_error_free(shell, "minishell: malloc");
 		i++;
 	}
 	if (!lvl_str)
 		lvl_str = ft_strdup("SHLVL=1");
-	export_var(&shell->env, lvl_str);
+	if (lvl_str)
+		export_var(&shell->env, lvl_str);
+	export_var(&shell->env, "SHELL=minishell");
 	free(lvl_str);
-	return shell;
+	return (shell);
 }
 
 void init_pointers(t_shell *shell)
 {
+	shell->env = NULL;
+	shell->exit_status = 0;
+	shell->fd_to_close = -1;
 	shell->ptrs = malloc(sizeof(t_ptrs)); // keep track of tokens and commands for easy freeing later
 	if (!shell->ptrs)
 		print_error_free(shell, "minishell: malloc");

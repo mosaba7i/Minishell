@@ -22,14 +22,13 @@ t_command *parse(t_token *tokens, t_shell *shell)
 	while (tokens)
 	{
 		current_cmd = new_command(shell);
+		append_command(&head, current_cmd);
+		shell->ptrs->commands = head; // update shell ptrs for freeing later
 		current_cmd->arg_lst = malloc((count_args(tokens) + 1) * sizeof(char *));
 		if (!current_cmd->arg_lst)
 			print_error_free(shell, "minishell: malloc");
 		get_args(current_cmd->arg_lst, tokens, shell);
 		current_cmd->redirs = get_redir(tokens, shell);
-		current_cmd->next = NULL;
-		append_command(&head, current_cmd);
-		shell->ptrs->commands = head; // update shell ptrs for freeing later
 		while (tokens && tokens->type != PIPE)
 			tokens = tokens->next;
 		if (tokens)
@@ -139,12 +138,13 @@ t_redir *get_redir(t_token *tokens, t_shell *shell)
 			current->type = tokens->type;
 			current->file = ft_strdup(tokens->next->value);
 			if (!current->file)
+			{
+				free(current);
 				print_error_free(shell, "minishell: malloc");
+			}
 			current->fd = -1;
-			current->next = NULL;
 			append_redir(&head, current);
-			tokens = tokens->next->next;
-			continue;
+			tokens = tokens->next;
 		}
 		tokens = tokens->next;
 	}
@@ -155,6 +155,7 @@ void append_redir(t_redir **head, t_redir *new)
 {
 	t_redir *last;
 
+	new->next = NULL;
 	if (!(*head))
 	{
 		*head = new;

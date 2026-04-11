@@ -77,7 +77,7 @@ static void child_exit_cleanly(int input_fd, int output_fd,
 		free_strs(env_list);
 	if (shell)
 	{
-		free_all(shell->ptrs->tokens, shell->ptrs->commands);
+		free_ptrs(shell->ptrs->tokens, shell->ptrs->commands);
 		free_env(shell);
 	}
 	exit(exit_code);
@@ -113,15 +113,23 @@ static void run_command_in_child(t_shell *shell, t_command *command,
 	full_path = NULL;
 	env_list = NULL;
 	initsig_child();
-	if (input_fd != -1 && redirect_fd(input_fd, STDIN_FILENO) == -1)
+	if (input_fd != -1)
 	{
-		perror("minishell: dup2");
-		child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
+		if (redirect_fd(input_fd, STDIN_FILENO) == -1)
+		{
+			perror("minishell: dup2");
+			child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
+		}
+		close(input_fd); // ✅ THIS WAS MISSING
 	}
-	if (output_fd != -1 && redirect_fd(output_fd, STDOUT_FILENO) == -1)
+	if (output_fd != -1)
 	{
-		perror("minishell: dup2");
-		child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
+		if (redirect_fd(output_fd, STDOUT_FILENO) == -1)
+		{
+			perror("minishell: dup2");
+			child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
+		}
+		close(output_fd); // ✅ THIS TOO
 	}
 	if (apply_redirs(command->redirs) == -1)
 		child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);

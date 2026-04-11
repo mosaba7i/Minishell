@@ -9,6 +9,7 @@ void append_token(t_token **head, t_token *new);
 void assign_token_types(t_token *head);
 int get_operator(char *input, int word);
 int is_operator_char(char c);
+t_token *create_token(char *input, int i, int end_pos, t_shell *shell);
 
 t_token *tokenize(char *input, t_shell *shell)
 {
@@ -28,15 +29,26 @@ t_token *tokenize(char *input, t_shell *shell)
 		end_pos = extract_word(input, shell, i);
 		if (end_pos == -1)
 			return (NULL);
-		current_token = new_token(ft_substr(input, i, end_pos - i));
-		if (!current_token)
-			print_error_free(shell, "minishell: malloc");
+		current_token = create_token(input, i, end_pos, shell);
 		append_token(&head, current_token);
 		shell->ptrs->tokens = head; // update shell ptrs for freeing later
 		i = end_pos;
 	}
 	assign_token_types(head);
 	return (head);
+}
+
+t_token *create_token(char *input, int i, int end_pos, t_shell *shell)
+{
+	t_token *current_token;
+
+	current_token = new_token(ft_substr(input, i, end_pos - i));
+	if (!current_token)
+	{
+		free(input);
+		print_error_free(shell, "minishell: malloc");
+	}
+	return (current_token);
 }
 
 int is_white_space(char c)

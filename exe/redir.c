@@ -57,8 +57,7 @@ int do_redirs(t_redir *r)
 			dup2(fd, 0);
 		else
 			dup2(fd, 1);
-		if (r->type != HEREDOC)
-			close(fd);
+		close(fd);
 		r = r->next;
 	}
 	return (0);

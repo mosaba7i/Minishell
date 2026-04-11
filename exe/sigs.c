@@ -17,7 +17,6 @@ int g_sign;
 static void hand_sigint(int sig)
 {
 	g_sign = sig;
-
 	write(1, "\n", 1);
 	rl_on_new_line();
 	rl_replace_line("", 0);
@@ -36,9 +35,13 @@ static void hand_sig_parent(int sig)
 
 static void hand_sigint_heredoc(int sig)
 {
-	(void)sig;
+	int fd;
+
+	fd = open("/dev/null", O_RDONLY);
+	g_sign = sig;
 	write(1, "\n", 1);
-	exit(130);
+	dup2(fd, STDIN_FILENO);
+	close(fd);
 }
 
 void initsig_prompt(void)

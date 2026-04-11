@@ -1,5 +1,7 @@
 #include "../minishell.h"
 
+extern int g_sign;
+
 void get_input(t_redir *redirs, t_shell *shell);
 void read_heredoc_input(t_redir *redirs, int fd[2], int expand, t_shell *shell);
 int start_heredoc(t_redir *redirs, t_shell *shell, int expand);
@@ -77,11 +79,28 @@ int start_heredoc(t_redir *redirs, t_shell *shell, int expand)
 		close(fd[1]);
 		waitpid(pid, &status, 0);
 		initsig_prompt();
-		if (WEXITSTATUS(status) == 130)
-			return (130);
 	}
 	redirs->fd = fd[0];
+	if (WEXITSTATUS(status) == 130)
+		return (130);
 	return (0);
+}
+
+void free_heredoc(t_shell *shell, char *line)
+{
+	free(line);
+	free_ptrs(shell->ptrs->tokens, shell->ptrs->commands);
+	free_env(shell);
+	rl_clear_history();
+}
+
+void process_line(char *line, t_shell *shell, int expand, int fd[2])
+{
+	if (expand)
+		expand_heredoc(&line, shell, fd);
+	write(fd[1], line, strlen(line));
+	write(fd[1], "\n", 1);
+	free(line);
 }
 
 void read_heredoc_input(t_redir *redirs, int fd[2], int expand, t_shell *shell)
@@ -94,19 +113,22 @@ void read_heredoc_input(t_redir *redirs, int fd[2], int expand, t_shell *shell)
 		line = readline("> ");
 		if (!line)
 		{
+			if (g_sign == 2)
+			{
+				close(fd[1]);
+				free_heredoc(shell, line);
+				exit(130);
+			}
 			printf("minishell: warning: here-document delimited by end-of-file (wanted `%s')\n", redirs->file);
+			free_heredoc(shell, line);
 			return;
 		}
 		if (!ft_strcmp(line, redirs->file))
 		{
-			free(line);
+			free_heredoc(shell, line);
 			return;
 		}
-		if (expand)
-			expand_heredoc(&line, shell, fd);
-		write(fd[1], line, strlen(line));
-		write(fd[1], "\n", 1);
-		free(line);
+		process_line(line, shell, expand, fd);
 	}
 }
 
@@ -115,6 +137,7 @@ void expand_heredoc(char **line, t_shell *shell, int fd[2])
 	char *pos;
 	char *var;
 
+	shell->fd_to_close = fd[1];
 	pos = ft_strchr(*line, '$');
 	while (pos)
 	{

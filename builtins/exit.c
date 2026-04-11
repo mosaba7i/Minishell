@@ -23,7 +23,7 @@ int ft_exit(t_shell *shell, char **args)
 	if (check_args(args, &exit_code))
 		return (1);
 	if (args)
-		free_all(shell->ptrs->tokens, shell->ptrs->commands);
+		free_ptrs(shell->ptrs->tokens, shell->ptrs->commands);
 	free_env(shell);
 	rl_clear_history();
 	exit(exit_code);

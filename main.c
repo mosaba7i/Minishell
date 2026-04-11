@@ -16,10 +16,15 @@ extern int g_sign;
 
 void print_tokens(t_token *head);
 void debug_print_heredocs(t_redir *redir_list);
-void free_commands(t_command *head);
 void print_heredocs(t_command *head);
 void print_commands(t_command *head);
 static void update_last_arg(t_command *cmd, t_shell *shell);
+
+void reset_ptrs(t_shell *shell)
+{
+	free_ptrs(shell->ptrs->tokens, shell->ptrs->commands);
+	assign_null(2, &shell->ptrs->tokens, &shell->ptrs->commands);
+}
 
 int main(int argc, char **argv, char **envp)
 {
@@ -33,7 +38,6 @@ int main(int argc, char **argv, char **envp)
 	shell = init_shell(envp);
 	if (!shell)
 		return (1);
-
 	while (1)
 	{
 		initsig_prompt();
@@ -41,6 +45,8 @@ int main(int argc, char **argv, char **envp)
 		if (!pwd)
 			pwd = "minishell";
 		prompt = ft_strjoin(pwd, "$ ");
+		if (!prompt)
+			print_error_free(shell, "minishell: malloc");
 		inpt_line = readline(prompt);
 		free(prompt);
 		if (g_sign == 2)
@@ -59,7 +65,7 @@ int main(int argc, char **argv, char **envp)
 		if (handle_heredoc(cmds, shell) == 130)
 		{
 			shell->exit_status = 130;
-			free_all(tokens, cmds);
+			reset_ptrs(shell);
 			continue;
 		}
 		// print_heredocs(cmds);
@@ -67,7 +73,7 @@ int main(int argc, char **argv, char **envp)
 		if (check_env_expansion(cmds, shell) == -1)
 		{
 			shell->exit_status = 1;
-			free_all(tokens, cmds);
+			reset_ptrs(shell);
 			continue;
 		}
 		// printf("after expansion: \n");
@@ -79,8 +85,7 @@ int main(int argc, char **argv, char **envp)
 		update_last_arg(cmds, shell);
 
 		execute(shell, cmds);
-		free_all(shell->ptrs->tokens, shell->ptrs->commands);
-		assign_null(2, &shell->ptrs->tokens, &shell->ptrs->commands);
+		reset_ptrs(shell);
 	}
 	return (0);
 }
@@ -133,7 +138,9 @@ void print_error_free(t_shell *shell, const char *msg)
 	if (shell)
 	{
 		if (shell->ptrs)
-			free_all(shell->ptrs->tokens, shell->ptrs->commands);
+			free_ptrs(shell->ptrs->tokens, shell->ptrs->commands);
+		if (shell->fd_to_close != -1)
+			close(shell->fd_to_close);
 		free_env(shell);
 	}
 	rl_clear_history();
@@ -275,6 +282,7 @@ void free_tokens(t_token *head)
 void free_commands(t_command *head)
 {
 	t_command *tmp;
+	t_redir *redir_tmp;
 	int i;
 
 	while (head)
@@ -282,10 +290,9 @@ void free_commands(t_command *head)
 		tmp = head;
 		head = head->next;
 		i = 0;
-		while (tmp->arg_lst[i])
+		while (tmp->arg_lst && tmp->arg_lst[i])
 			free(tmp->arg_lst[i++]);
 		free(tmp->arg_lst);
-		t_redir *redir_tmp;
 		while (tmp->redirs)
 		{
 			redir_tmp = tmp->redirs;
@@ -299,11 +306,13 @@ void free_commands(t_command *head)
 	}
 }
 
-void *free_all(t_token *tokens, t_command *cmds)
+void *free_ptrs(t_token *tokens, t_command *cmds)
 {
 	if (tokens)
 		free_tokens(tokens);
 	if (cmds)
 		free_commands(cmds);
+	tokens = NULL;
+	cmds = NULL;
 	return (NULL);
 }

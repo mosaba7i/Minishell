@@ -103,6 +103,7 @@ typedef struct s_shell
 	t_env *env;	  // linked list of environment variables
 	t_ptrs *ptrs; // struct to hold pointers to tokens, commands, and line for easy freeing
 	int exit_status;
+	int fd_to_close;
 } t_shell;
 
 // init and free funcs
@@ -147,7 +148,7 @@ void handle_quotes(t_command *cmds, t_shell *shell);
 void print_error_free(t_shell *shell, const char *msg);
 int print_error_syntax(char *msg, char *str, t_shell *shell);
 void free_tokens(t_token *head);
-void *free_all(t_token *tokens, t_command *cmds);
+void *free_ptrs(t_token *tokens, t_command *cmds);
 char *get_env_value(t_shell *shell, char *key);
 void set_env_value(t_shell *shell, char *key, char *value);
 int is_path_directory(const char *path);
@@ -155,5 +156,6 @@ int is_valid_num(char *str_num);
 long long ft_atol(const char *str, int *overflow);
 void search_remove_quotes(char **arg, t_shell *shell);
 void expand_var(char *var, char **arg, t_shell *shell, int substitute);
+void free_commands(t_command *head);
 
 #endif

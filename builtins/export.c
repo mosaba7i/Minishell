@@ -18,11 +18,15 @@ void get_key_value(char *arg, char **key, char **value)
 	if (equal)
 	{
 		*key = ft_substr(arg, 0, equal - arg);
+		if (!*key)
+			return;
 		*value = equal + 1;
 	}
 	else
 	{
 		*key = ft_strdup(arg);
+		if (!*key)
+			return;
 		*value = NULL;
 	}
 }
@@ -68,8 +72,9 @@ int export(t_shell *shell, char **args)
 	return_value = 0;
 	while (args[i])
 	{
-		if (export_var(&shell->env, args[i]))
-			return_value = 1;
+		return_value = export_var(&shell->env, args[i]);
+		if (return_value == 2)
+			print_error_free(shell, "minishell: malloc");
 		i++;
 	}
 	return (return_value);
