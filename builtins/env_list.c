@@ -1,41 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   env_list.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 15:06:11 by malsabah          #+#    #+#             */
-/*   Updated: 2026/04/20 15:06:12 by malsabah         ###   ########.fr       */
+/*   Created: 2026/04/21 14:49:10 by malsabah          #+#    #+#             */
+/*   Updated: 2026/04/21 15:14:54 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	ft_env(t_shell *shell)
+void	add_env_back(t_env **env, t_env *new)
 {
 	t_env	*tmp;
 
-	if (!shell || !shell->env)
-		return (1);
-	tmp = shell->env;
-	while (tmp)
+	if (!*env)
 	{
-		if (tmp->value)
-			printf("%s=%s\n", tmp->key, tmp->value);
-		tmp = tmp->next;
+		*env = new;
+		return ;
 	}
-	return (0);
+	tmp = *env;
+	while (tmp->next)
+		tmp = tmp->next;
+	tmp->next = new;
 }
-
-// for testing only
-/*int main(int ac,char **av,char **envp)
-{
-	//cc env.c ../init_shell.c export.c export_utils.c -L ../libft/ -lft
-	t_shell *shell;
-
-	shell = init_shell(envp);
-	ft_env(shell);
-	free_env(shell);
-	return (0);
-}*/

@@ -12,10 +12,10 @@
 
 #include "../minishell.h"
 
-static char *get_path(t_command *cmd, t_shell *shell);
-void update_pwd(t_shell *shell, char *oldpwd, int oldpwd_status);
+static char	*get_path(t_command *cmd, t_shell *shell);
+void		update_pwd(t_shell *shell, char *oldpwd, int oldpwd_status);
 
-static int print_error(char *cmd, char *message, int status)
+static int	print_error(char *cmd, char *message, int status)
 {
 	write(2, "minishell: ", 11);
 	if (cmd)
@@ -29,69 +29,16 @@ static int print_error(char *cmd, char *message, int status)
 	return (status);
 }
 
-static t_env *find_env(t_env *env, char *key)
+/* set_env_value and get_env_value moved to builtins/env_helpers.c */
+
+int	ft_cd(t_shell *shell, t_command *cmd)
 {
-	while (env)
-	{
-		if (ft_strncmp(env->key, key, ft_strlen(key) + 1) == 0)
-			return (env);
-		env = env->next;
-	}
-	return (NULL);
-}
-
-void set_env_value(t_shell *shell, char *key, char *value)
-{
-	t_env *node;
-
-	if (!key || !shell)
-		return;
-	node = find_env(shell->env, key);
-	if (node)
-	{
-		free(node->value);
-		if (value)
-			node->value = ft_strdup(value);
-		else
-			node->value = NULL;
-	}
-	else
-	{
-		t_env *new = malloc(sizeof(t_env));
-		if (!new)
-			return;
-		new->key = ft_strdup(key);
-		if (value)
-			new->value = ft_strdup(value);
-		else
-			new->value = NULL;
-		new->next = shell->env;
-		shell->env = new;
-	}
-}
-
-char *get_env_value(t_shell *shell, char *key)
-{
-	t_env *tmp;
-
-	tmp = shell->env;
-	while (tmp)
-	{
-		if (ft_strncmp(tmp->key, key, ft_strlen(key) + 1) == 0)
-			return (tmp->value);
-		tmp = tmp->next;
-	}
-	return (NULL);
-}
-
-int ft_cd(t_shell *shell, t_command *cmd)
-{
-	char *path;
-	char oldpwd[PATH_MAX];
-	int oldpwd_status;
+	char	*path;
+	char	oldpwd[PATH_MAX];
+	int		oldpwd_status;
 
 	oldpwd_status = 1;
-	if(!getcwd(oldpwd, sizeof(oldpwd)))
+	if (!getcwd(oldpwd, sizeof(oldpwd)))
 		oldpwd_status = 0;
 	if (cmd->arg_lst[1] && cmd->arg_lst[2])
 		return (print_error("cd", "too many arguments", 1));
@@ -107,23 +54,23 @@ int ft_cd(t_shell *shell, t_command *cmd)
 	return (0);
 }
 
-
-void update_pwd(t_shell *shell, char *oldpwd, int oldpwd_status)
+void	update_pwd(t_shell *shell, char *oldpwd, int oldpwd_status)
 {
-	char cwd[PATH_MAX];
+	char	cwd[PATH_MAX];
 
-	if(!getcwd(cwd, sizeof(cwd)))
+	if (!getcwd(cwd, sizeof(cwd)))
 		ft_fprintf(2, "cd: error retrieving current directory: %s %s",
-			"getcwd: cannot access parent directories:","No such file or directory\n");
+			"getcwd: cannot access parent directories:",
+			"No such file or directory\n");
 	else
 		set_env_value(shell, "PWD", cwd);
-	if(oldpwd_status)
+	if (oldpwd_status)
 		set_env_value(shell, "OLDPWD", oldpwd);
 }
 
-static char *get_path(t_command *cmd, t_shell *shell)
+static char	*get_path(t_command *cmd, t_shell *shell)
 {
-	char *path;
+	char	*path;
 
 	path = NULL;
 	if (!cmd->arg_lst[1])
@@ -142,7 +89,7 @@ static char *get_path(t_command *cmd, t_shell *shell)
 }
 
 /*
-int main(int ac, char **av, char **envp)
+int	main(int ac, char **av, char **envp)
 {
 //cc cd.c ../init_shell.c export.c export_utils.c -L ../libft/ -lft
 	t_shell    *shell;

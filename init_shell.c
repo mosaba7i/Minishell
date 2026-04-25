@@ -3,30 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   init_shell.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
+/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 17:40:14 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/27 17:56:59 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/04/20 15:14:42 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void init_pointers(t_shell *shell);
-char *get_lvl(t_shell *shell, char *env_var);
+void	init_pointers(t_shell *shell);
+char	*get_lvl(t_shell *shell, char *env_var);
 
-t_shell *init_shell(char **envp)
+t_shell	*init_shell(char **envp)
 {
-	t_shell *shell;
-	char *lvl_str;
+	t_shell	*shell;
+	char	*lvl_str;
+	int		i;
 
 	shell = malloc(sizeof(t_shell));
 	if (!shell)
 		print_error_free(NULL, "minishell: malloc");
-
 	init_pointers(shell);
 	lvl_str = NULL;
-	int i = 0;
+	i = 0;
 	while (envp[i])
 	{
 		if (ft_strncmp(envp[i], "SHLVL=", 6) == 0)
@@ -44,21 +44,22 @@ t_shell *init_shell(char **envp)
 	return (shell);
 }
 
-void init_pointers(t_shell *shell)
+void	init_pointers(t_shell *shell)
 {
 	shell->env = NULL;
 	shell->exit_status = 0;
 	shell->fd_to_close = -1;
-	shell->ptrs = malloc(sizeof(t_ptrs)); // keep track of tokens and commands for easy freeing later
+	shell->ptrs = malloc(sizeof(t_ptrs));
 	if (!shell->ptrs)
 		print_error_free(shell, "minishell: malloc");
 	shell->ptrs->tokens = NULL;
 	shell->ptrs->commands = NULL;
 }
 
-void free_env(t_shell *shell)
+void	free_env(t_shell *shell)
 {
-	t_env *tmp;
+	t_env	*tmp;
+
 	while (shell->env)
 	{
 		tmp = shell->env;
@@ -71,19 +72,19 @@ void free_env(t_shell *shell)
 	free(shell);
 }
 
-void free_1env(t_env *env)
+void	free_1env(t_env *env)
 {
 	free(env->key);
 	free(env->value);
 	free(env);
 }
 
-char *get_lvl(t_shell *shell, char *env_var)
+char	*get_lvl(t_shell *shell, char *env_var)
 {
-	long long lvl_num;
-	int overflow;
-	char *lvl;
-	char *str_num;
+	long long	lvl_num;
+	int			overflow;
+	char		*lvl;
+	char		*str_num;
 
 	overflow = 0;
 	lvl_num = 0;

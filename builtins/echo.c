@@ -50,9 +50,9 @@ int	ft_echo(char **args)
 	return (0);
 }
 
-//for testing
+// for testing
 /*int main(int ac,char **av)
 {
 	// cc echo.c
-    ft_echo(av);
+	ft_echo(av);
 }*/

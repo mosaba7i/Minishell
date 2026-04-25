@@ -1,41 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   builtin_parent.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 15:06:11 by malsabah          #+#    #+#             */
-/*   Updated: 2026/04/20 15:06:12 by malsabah         ###   ########.fr       */
+/*   Created: 2026/04/21 02:32:44 by malsabah          #+#    #+#             */
+/*   Updated: 2026/04/21 02:32:46 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	ft_env(t_shell *shell)
+int	apply_and_exec_builtin(t_shell *shell, t_command *command)
 {
-	t_env	*tmp;
-
-	if (!shell || !shell->env)
+	shell->is_parent = TRUE;
+	if (apply_redirs(command->redirs) == -1)
 		return (1);
-	tmp = shell->env;
-	while (tmp)
-	{
-		if (tmp->value)
-			printf("%s=%s\n", tmp->key, tmp->value);
-		tmp = tmp->next;
-	}
-	return (0);
+	return (exe_builtin(shell, command));
 }
-
-// for testing only
-/*int main(int ac,char **av,char **envp)
-{
-	//cc env.c ../init_shell.c export.c export_utils.c -L ../libft/ -lft
-	t_shell *shell;
-
-	shell = init_shell(envp);
-	ft_env(shell);
-	free_env(shell);
-	return (0);
-}*/

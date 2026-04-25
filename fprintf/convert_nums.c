@@ -12,10 +12,10 @@
 
 #include "ft_fprintf.h"
 
-int num_length(long long num, long long base)
+int	num_length(long long num, long long base)
 {
-	unsigned long long temp;
-	int length;
+	unsigned long long	temp;
+	int					length;
 
 	temp = (unsigned long long)num;
 	if (!temp)
@@ -29,11 +29,11 @@ int num_length(long long num, long long base)
 	return (length);
 }
 
-char *num_to_string(char *char_base, long long num, int base)
+char	*num_to_string(char *char_base, long long num, int base)
 {
-	int i;
-	int minus;
-	char *char_num;
+	int		i;
+	int		minus;
+	char	*char_num;
 
 	i = 0;
 	minus = 0;
@@ -58,11 +58,11 @@ char *num_to_string(char *char_base, long long num, int base)
 	return (reverse_num(char_num, i - 1));
 }
 
-char *num_to_string_unsighned(char *char_base, unsigned long long num,
-							  int base)
+char	*num_to_string_unsighned(char *char_base, unsigned long long num,
+		int base)
 {
-	int i;
-	char *char_num;
+	int		i;
+	char	*char_num;
 
 	char_num = (char *)malloc(num_length(num, base) + 1);
 	i = 0;
@@ -78,10 +78,10 @@ char *num_to_string_unsighned(char *char_base, unsigned long long num,
 	return (reverse_num(char_num, i - 1));
 }
 
-char *reverse_num(char *num, int i)
+char	*reverse_num(char *num, int i)
 {
-	int min;
-	char temp;
+	int		min;
+	char	temp;
 
 	min = 0;
 	if (num[0] == '-')

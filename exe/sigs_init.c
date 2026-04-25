@@ -1,52 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   signals.c                                          :+:      :+:    :+:   */
+/*   sigs_init.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/28 04:48:35 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/28 04:56:46 by malsabah         ###   ########.fr       */
+/*   Created: 2026/04/21 02:35:06 by malsabah          #+#    #+#             */
+/*   Updated: 2026/04/21 20:47:57 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int g_sign;
+void		hand_sigint(int sig);
+void		hand_sigint_heredoc(int sig);
 
-static void hand_sigint(int sig)
+void	initsig_prompt(void)
 {
-	g_sign = sig;
-	write(1, "\n", 1);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-}
-
-static void hand_sig_parent(int sig)
-{
-	g_sign = sig;
-	if (sig == SIGINT)
-		write(1, "\n", 1);
-	else if (sig == SIGQUIT)
-		ft_fprintf(1, "Quit: (core dumped) \n");
-	rl_on_new_line();
-}
-
-static void hand_sigint_heredoc(int sig)
-{
-	int fd;
-
-	fd = open("/dev/null", O_RDONLY);
-	g_sign = sig;
-	write(1, "\n", 1);
-	dup2(fd, STDIN_FILENO);
-	close(fd);
-}
-
-void initsig_prompt(void)
-{
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	g_sign = 0;
 	sa.sa_handler = hand_sigint;
@@ -57,27 +28,21 @@ void initsig_prompt(void)
 	sigaction(SIGQUIT, &sa, NULL);
 }
 
-void initsig_parent(void)
+void	initsig_parent(void)
 {
-	struct sigaction sa;
-
-	g_sign = 0;
-	sa.sa_handler = hand_sig_parent;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
 }
 
-void initsig_child(void)
+void	initsig_child(void)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 }
 
-void initsig_heredoc(void)
+void	initsig_heredoc(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	g_sign = 0;
 	sa.sa_handler = hand_sigint_heredoc;

@@ -12,16 +12,16 @@
 
 #include "ft_fprintf.h"
 
-static int check_type(char chara, char *set);
-static int count_arg(const char *text);
-static int handle_no_percent(const char *text, int length, int fd);
+static int	check_type(char chara, char *set);
+static int	count_arg(const char *text);
+static int	handle_no_percent(const char *text, int length, int fd);
 
-int ft_fprintf(const int fd, const char *text, ...)
+int	ft_fprintf(const int fd, const char *text, ...)
 {
-	va_list arguments;
-	int arg_count;
-	char **full_text;
-	int length;
+	va_list	arguments;
+	int		arg_count;
+	char	**full_text;
+	int		length;
 
 	length = ft_strlen(text);
 	if (!length)
@@ -43,10 +43,10 @@ int ft_fprintf(const int fd, const char *text, ...)
 	return (length);
 }
 
-static int count_arg(const char *text)
+static int	count_arg(const char *text)
 {
-	int i;
-	int arg_count;
+	int	i;
+	int	arg_count;
 
 	i = 0;
 	arg_count = 0;
@@ -61,7 +61,7 @@ static int count_arg(const char *text)
 				else
 					return (-1);
 				i += 2;
-				continue;
+				continue ;
 			}
 			else
 				return (-1);
@@ -71,9 +71,9 @@ static int count_arg(const char *text)
 	return (arg_count);
 }
 
-static int check_type(char chara, char *set)
+static int	check_type(char chara, char *set)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (set[i])
@@ -85,9 +85,9 @@ static int check_type(char chara, char *set)
 	return (0);
 }
 
-static int handle_no_percent(const char *text, int length, int fd)
+static int	handle_no_percent(const char *text, int length, int fd)
 {
-	char *s;
+	char	*s;
 
 	s = (char *)text;
 	while (*s)

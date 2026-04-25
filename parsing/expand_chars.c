@@ -1,41 +1,41 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   expand_chars.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 15:06:11 by malsabah          #+#    #+#             */
-/*   Updated: 2026/04/20 15:06:12 by malsabah         ###   ########.fr       */
+/*   Created: 2026/04/21 14:37:03 by malsabah          #+#    #+#             */
+/*   Updated: 2026/04/21 14:37:04 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	ft_env(t_shell *shell)
+void	substitute_expand_char(char *env_value)
 {
-	t_env	*tmp;
+	int	i;
 
-	if (!shell || !shell->env)
-		return (1);
-	tmp = shell->env;
-	while (tmp)
+	i = 0;
+	while (env_value[i])
 	{
-		if (tmp->value)
-			printf("%s=%s\n", tmp->key, tmp->value);
-		tmp = tmp->next;
+		if (env_value[i] == '\'')
+			env_value[i] = X_SQUOTE;
+		else if (env_value[i] == '\"')
+			env_value[i] = X_DQUOTE;
+		else if (env_value[i] == '$')
+			env_value[i] = X_DOLLAR;
+		i++;
 	}
-	return (0);
 }
 
-// for testing only
-/*int main(int ac,char **av,char **envp)
+char	get_expand_char(char c)
 {
-	//cc env.c ../init_shell.c export.c export_utils.c -L ../libft/ -lft
-	t_shell *shell;
-
-	shell = init_shell(envp);
-	ft_env(shell);
-	free_env(shell);
-	return (0);
-}*/
+	if (c == '\'')
+		return (X_SQUOTE);
+	else if (c == '\"')
+		return (X_DQUOTE);
+	else if (c == '$')
+		return (X_DOLLAR);
+	return (c);
+}

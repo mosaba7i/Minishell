@@ -1,41 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   assign_null.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 15:06:11 by malsabah          #+#    #+#             */
-/*   Updated: 2026/04/20 15:06:12 by malsabah         ###   ########.fr       */
+/*   Created: 2026/04/21 14:36:57 by malsabah          #+#    #+#             */
+/*   Updated: 2026/04/21 14:36:58 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	ft_env(t_shell *shell)
+void	assign_null(int num, ...)
 {
-	t_env	*tmp;
+	va_list	arguments;
+	int		i;
+	void	**current;
 
-	if (!shell || !shell->env)
-		return (1);
-	tmp = shell->env;
-	while (tmp)
+	va_start(arguments, num);
+	i = 0;
+	while (i < num)
 	{
-		if (tmp->value)
-			printf("%s=%s\n", tmp->key, tmp->value);
-		tmp = tmp->next;
+		current = va_arg(arguments, void **);
+		*current = NULL;
+		i++;
 	}
-	return (0);
+	va_end(arguments);
 }
-
-// for testing only
-/*int main(int ac,char **av,char **envp)
-{
-	//cc env.c ../init_shell.c export.c export_utils.c -L ../libft/ -lft
-	t_shell *shell;
-
-	shell = init_shell(envp);
-	ft_env(shell);
-	free_env(shell);
-	return (0);
-}*/

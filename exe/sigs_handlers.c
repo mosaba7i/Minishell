@@ -1,36 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   sigs_handlers.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/12 12:37:54 by malsabah          #+#    #+#             */
-/*   Updated: 2026/02/20 17:57:18 by malsabah         ###   ########.fr       */
+/*   Created: 2026/04/21 02:34:56 by malsabah          #+#    #+#             */
+/*   Updated: 2026/04/21 20:47:53 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	pwd(void)
+void	hand_sigint(int sig)
 {
-	char	*cwd;
-
-	cwd = getcwd(NULL, 0);
-	if (!cwd)
-	{
-		ft_fprintf(2, "pwd: error retrieving current directory: %s\n",
-			strerror(errno));
-		return (1);
-	}
-	printf("%s\n", cwd);
-	free(cwd);
-	return (0);
+	g_sign = sig;
+	write(1, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
 }
 
-// for testing only
-/*int main(void)
+void	hand_sigint_heredoc(int sig)
 {
-	// cc pwd.c
-	pwd();
-}*/
+	int	fd;
+
+	fd = open("/dev/null", O_RDONLY);
+	g_sign = sig;
+	write(1, "\n", 1);
+	dup2(fd, STDIN_FILENO);
+	close(fd);
+}

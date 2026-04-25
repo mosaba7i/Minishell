@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   convert_misc.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
+/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/18 14:36:25 by lalkhati          #+#    #+#             */
-/*   Updated: 2025/09/18 14:51:56 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/04/20 15:07:35 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_fprintf.h"
 
-char *char_to_string(char chara)
+char	*char_to_string(char chara)
 {
-	char *new;
+	char	*new;
 
 	new = malloc(2);
 	if (!new)
@@ -24,11 +24,11 @@ char *char_to_string(char chara)
 	return (new);
 }
 
-char *ft_address_char(void *addr)
+char	*ft_address_char(void *addr)
 {
-	int i;
-	char *hex_address;
-	unsigned long long div;
+	int					i;
+	char				*hex_address;
+	unsigned long long	div;
 
 	hex_address = (char *)malloc(18);
 	div = (unsigned long long)addr;
@@ -50,9 +50,9 @@ char *ft_address_char(void *addr)
 	return (hex_address);
 }
 
-char *ft_strcpy(char *dest, char *src)
+char	*ft_strcpy(char *dest, char *src)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (src[i] != '\0')

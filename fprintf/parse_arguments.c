@@ -12,11 +12,11 @@
 
 #include "ft_fprintf.h"
 
-int parse_arguments(const char *text, char **full_text, va_list arguments,
-					int arg_count)
+int	parse_arguments(const char *text, char **full_text, va_list arguments,
+		int arg_count)
 {
-	int j;
-	int i;
+	int	j;
+	int	i;
 
 	j = 0;
 	i = 0;
@@ -36,7 +36,7 @@ int parse_arguments(const char *text, char **full_text, va_list arguments,
 	return (1);
 }
 
-char *parse_specifier(char specifier, va_list arguments)
+char	*parse_specifier(char specifier, va_list arguments)
 {
 	if (specifier == 'c')
 		return (char_to_string(va_arg(arguments, int)));
@@ -47,22 +47,24 @@ char *parse_specifier(char specifier, va_list arguments)
 	if (specifier == 'p')
 		return (ft_address_char(va_arg(arguments, void *)));
 	if (specifier == 'u')
-		return (num_to_string_unsighned("0123456789", va_arg(arguments, unsigned int), 10));
+		return (num_to_string_unsighned("0123456789", va_arg(arguments,
+					unsigned int), 10));
 	if (specifier == 'x')
-		return (num_to_string_unsighned("0123456789abcdef", va_arg(arguments, unsigned int), 16));
+		return (num_to_string_unsighned("0123456789abcdef", va_arg(arguments,
+					unsigned int), 16));
 	if (specifier == 'X')
-		return (num_to_string_unsighned("0123456789ABCDEF", va_arg(arguments, unsigned int), 16));
+		return (num_to_string_unsighned("0123456789ABCDEF", va_arg(arguments,
+					unsigned int), 16));
 	if (specifier == '%')
 		return (ft_strdup("%"));
 	return (NULL);
 }
 
-int process_output(const char *text, char **full_text, int arg_count,
-				   int fd)
+int	process_output(const char *text, char **full_text, int arg_count, int fd)
 {
-	int j;
-	char *percent_pos;
-	int length;
+	int		j;
+	char	*percent_pos;
+	int		length;
 
 	length = 0;
 	j = 0;
@@ -87,10 +89,10 @@ int process_output(const char *text, char **full_text, int arg_count,
 	return (count_and_free_all(full_text, arg_count) + length);
 }
 
-int count_and_free_all(char **arg_array, int arg_count)
+int	count_and_free_all(char **arg_array, int arg_count)
 {
-	int i;
-	size_t length;
+	int		i;
+	size_t	length;
 
 	i = 0;
 	length = 0;
@@ -104,11 +106,11 @@ int count_and_free_all(char **arg_array, int arg_count)
 	return (length);
 }
 
-char *ft_strdup_null(const char *str)
+char	*ft_strdup_null(const char *str)
 {
-	size_t i;
-	size_t length;
-	char *new_str;
+	size_t	i;
+	size_t	length;
+	char	*new_str;
 
 	if (!str)
 	{

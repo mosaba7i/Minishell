@@ -6,282 +6,81 @@
 /*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 00:00:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/04/04 02:25:12 by malsabah         ###   ########.fr       */
+/*   Updated: 2026/04/21 02:33:27 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static void safe_close(int *fd_to_close)
+/* redirect and child cleanup are handled in exe/run_child.c now */
+
+void	print_cmd_not_found(char *cmd)
 {
-	if (*fd_to_close != -1)
-	{
-		close(*fd_to_close);
-		*fd_to_close = -1;
-	}
-}
-
-static int redirect_fd(int from_fd, int to_fd)
-{
-	if (from_fd == -1)
-		return (-1);
-	if (from_fd == to_fd)
-		return (0);
-	if (dup2(from_fd, to_fd) == -1)
-		return (-1);
-	return (0);
-}
-
-static void wait_for_leftovers(void)
-{
-	int status;
-
-	while (wait(&status) > 0)
-		;
-}
-
-static int wait_for_everything(pid_t last_child)
-{
-	int status;
-	pid_t finished_pid;
-	int final_status;
-
-	final_status = 0;
-	finished_pid = wait(&status);
-	while (finished_pid > 0)
-	{
-		if (finished_pid == last_child)
-		{
-			if (WIFSIGNALED(status))
-				final_status = 128 + WTERMSIG(status);
-			else if (WIFEXITED(status))
-				final_status = WEXITSTATUS(status);
-			else
-				final_status = 1;
-		}
-		finished_pid = wait(&status);
-	}
-	return (final_status);
-}
-
-static void child_exit_cleanly(int input_fd, int output_fd,
-							   char *full_path, char **env_list, t_shell *shell, int exit_code)
-{
-	if (input_fd != -1 && input_fd != STDIN_FILENO)
-		close(input_fd);
-	if (output_fd != -1 && output_fd != STDOUT_FILENO)
-		close(output_fd);
-	if (full_path)
-		free(full_path);
-	if (env_list)
-		free_strs(env_list);
-	if (shell)
-	{
-		free_ptrs(shell->ptrs->tokens, shell->ptrs->commands);
-		free_env(shell);
-	}
-	exit(exit_code);
-}
-
-void print_cmd_not_found(char *cmd)
-{
-	char *tmp;
-	char *msg;
+	char	*tmp;
+	char	*msg;
 
 	if (ft_strcmp(cmd, "") == 0)
 	{
 		write(2, " '' : command not found\n", 24);
-		return;
+		return ;
 	}
 	tmp = ft_strjoin(cmd, ": ");
 	if (!tmp)
-		return;
+		return ;
 	msg = ft_strjoin(tmp, "command not found\n");
 	free(tmp);
 	if (!msg)
-		return;
+		return ;
 	write(2, msg, ft_strlen(msg));
 	free(msg);
 }
 
-static void run_command_in_child(t_shell *shell, t_command *command,
-								 int input_fd, int output_fd)
+/* run_command_in_child moved to exe/run_child.c */
+
+static int	save_stdio(int *saved_stdin, int *saved_stdout)
 {
-	char *full_path;
-	char **env_list;
-
-	full_path = NULL;
-	env_list = NULL;
-	initsig_child();
-	if (input_fd != -1)
-	{
-		if (redirect_fd(input_fd, STDIN_FILENO) == -1)
-		{
-			perror("minishell: dup2");
-			child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
-		}
-		close(input_fd); // ✅ THIS WAS MISSING
-	}
-	if (output_fd != -1)
-	{
-		if (redirect_fd(output_fd, STDOUT_FILENO) == -1)
-		{
-			perror("minishell: dup2");
-			child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
-		}
-		close(output_fd); // ✅ THIS TOO
-	}
-	if (apply_redirs(command->redirs) == -1)
-		child_exit_cleanly(input_fd, output_fd, full_path, env_list, shell, 1);
-	if (!command->arg_lst || !command->arg_lst[0])
-		child_exit_cleanly(-1, -1, full_path, env_list, shell, 0);
-	if (is_builtin(command->arg_lst[0]))
-		child_exit_cleanly(-1, -1, full_path, env_list, shell,
-						   exe_builtin(shell, command));
-	full_path = get_cmd_path(shell, command->arg_lst[0]);
-	if (!full_path)
-	{
-		if (ft_strchr(command->arg_lst[0], '/'))
-		{
-			int saved_errno = errno;
-			write(2, "minishell: ", 11);
-			perror(command->arg_lst[0]);
-			if (saved_errno == ENOENT)
-				child_exit_cleanly(-1, -1, full_path, env_list, shell, 127);
-			else if (saved_errno == EACCES)
-				child_exit_cleanly(-1, -1, full_path, env_list, shell, 126);
-		}
-		else
-			print_cmd_not_found(command->arg_lst[0]);
-		child_exit_cleanly(-1, -1, full_path, env_list, shell, 127);
-	}
-	env_list = env_to_array(shell->env);
-
-	if (!env_list)
-	{
-		perror("minishell: env_to_array");
-		child_exit_cleanly(-1, -1, full_path, env_list, shell, 1);
-	}
-	execve(full_path, command->arg_lst, env_list);
-	int saved_errno = errno;
-	write(2, "minishell: ", 11);
-	if (is_path_directory(full_path))
-		ft_fprintf(2, "%s: Is a directory\n", full_path);
-	else
-		perror(command->arg_lst[0]);
-	if (saved_errno == EACCES)
-		child_exit_cleanly(-1, -1, full_path, env_list, shell, 126);
-	else if (saved_errno == ENOENT)
-		child_exit_cleanly(-1, -1, full_path, env_list, shell, 127);
-	child_exit_cleanly(-1, -1, full_path, env_list, shell, 1);
-}
-
-static int restore_stdio(int saved_stdin, int saved_stdout)
-{
-	int restore_failed;
-
-	restore_failed = 0;
-	if (saved_stdin != -1)
-	{
-		if (dup2(saved_stdin, STDIN_FILENO) == -1)
-			restore_failed = 1;
-		close(saved_stdin);
-	}
-	if (saved_stdout != -1)
-	{
-		if (dup2(saved_stdout, STDOUT_FILENO) == -1)
-			restore_failed = 1;
-		close(saved_stdout);
-	}
-	return (restore_failed);
-}
-
-// TODO: When we input exit, the program exits without reaching restore_stdio, so 2 extra fds
-// remain open. run valgrind with  --track-fds=yes to check (it report 5 open, 3 of them stds and 2 of them the extra fds).
-static int run_builtin_in_parent(t_shell *shell, t_command *command)
-{
-	int saved_stdin;
-	int saved_stdout;
-	int builtin_status;
-
-	saved_stdin = dup(STDIN_FILENO);
-	saved_stdout = dup(STDOUT_FILENO);
-	if (saved_stdin == -1 || saved_stdout == -1)
+	*saved_stdin = dup(STDIN_FILENO);
+	*saved_stdout = dup(STDOUT_FILENO);
+	if (*saved_stdin == -1 || *saved_stdout == -1)
 	{
 		perror("minishell: dup");
-		safe_close(&saved_stdin);
-		safe_close(&saved_stdout);
+		safe_close(saved_stdin);
+		safe_close(saved_stdout);
 		return (1);
 	}
-	builtin_status = 0;
-	if (apply_redirs(command->redirs) == -1)
-		builtin_status = 1;
-	else
-		builtin_status = exe_builtin(shell, command);
-	if (restore_stdio(saved_stdin, saved_stdout))
+	return (0);
+}
+
+static int	run_builtin_in_parent(t_shell *shell, t_command *command)
+{
+	int	saved_stdin;
+	int	saved_stdout;
+	int	builtin_status;
+
+	shell->is_parent = TRUE;
+	if (command->arg_lst && ft_strncmp(command->arg_lst[0], "exit", 5) == 0)
 	{
-		perror("minishell: dup2");
-		return (1);
+		if (apply_redirs(command->redirs) == -1)
+			return (1);
+		return (exe_builtin(shell, command));
 	}
+	if (save_stdio(&saved_stdin, &saved_stdout))
+		return (1);
+	builtin_status = apply_and_exec_builtin(shell, command);
+	if (restore_stdio(saved_stdin, saved_stdout))
+		return (1);
 	return (builtin_status);
 }
 
-int execute(t_shell *shell, t_command *command_list)
+int	execute(t_shell *shell, t_command *command_list)
 {
-	int last_input_fd;
-	int pipe_fds[2];
-	pid_t child_pid;
-	pid_t last_child;
-	int started_any_child;
-
 	initsig_parent();
 	if (!command_list)
 		return (0);
-	if (!command_list->next && command_list->arg_lst && is_builtin(command_list->arg_lst[0]))
+	if (!command_list->next && command_list->arg_lst
+		&& is_builtin(command_list->arg_lst[0]))
 		return (shell->exit_status = run_builtin_in_parent(shell,
-														   command_list));
-	last_input_fd = -1;
-	last_child = -1;
-	started_any_child = 0;
-	while (command_list)
-	{
-		pipe_fds[0] = -1;
-		pipe_fds[1] = -1;
-		if (command_list->next && pipe(pipe_fds) == -1)
-		{
-			perror("minishell: pipe");
-			safe_close(&last_input_fd);
-			if (started_any_child)
-				wait_for_leftovers();
-			shell->exit_status = 1;
-			return (shell->exit_status);
-		}
-		child_pid = fork();
-		if (child_pid == -1)
-		{
-			perror("minishell: fork");
-			safe_close(&last_input_fd);
-			safe_close(&pipe_fds[0]);
-			safe_close(&pipe_fds[1]);
-			if (started_any_child)
-				wait_for_leftovers();
-			shell->exit_status = 1;
-			return (shell->exit_status);
-		}
-		if (child_pid == 0)
-		{
-			safe_close(&pipe_fds[0]);
-			run_command_in_child(shell, command_list, last_input_fd,
-								 pipe_fds[1]);
-		}
-		started_any_child = 1;
-		safe_close(&last_input_fd);
-		safe_close(&pipe_fds[1]);
-		last_input_fd = pipe_fds[0];
-		last_child = child_pid;
-		command_list = command_list->next;
-	}
-	safe_close(&last_input_fd);
-	shell->exit_status = wait_for_everything(last_child);
+				command_list));
+	shell->exit_status = run_pipeline(shell, command_list);
 	return (shell->exit_status);
 }

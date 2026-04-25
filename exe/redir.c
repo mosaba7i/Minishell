@@ -3,67 +3,52 @@
 /*                                                        :::      ::::::::   */
 /*   redir.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lalkhati <lalkhati@student.42.fr>          +#+  +:+       +#+        */
+/*   By: malsabah <malsabah@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 00:00:00 by malsabah          #+#    #+#             */
-/*   Updated: 2026/03/19 17:34:23 by lalkhati         ###   ########.fr       */
+/*   Updated: 2026/04/20 14:05:22 by malsabah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static int open_inputfile(char *file)
+static int	dup_one_redir(int fd, t_redir *r)
 {
-	int fd;
+	int	target;
 
-	fd = open(file, O_RDONLY);
-	if (fd == -1)
-		perror(file);
-	return (fd);
-}
-
-static int open_outputfile(char *file, int append)
-{
-	int fd;
-
-	if (append)
-		fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (r->type == REDIR_IN || r->type == HEREDOC)
+		target = STDIN_FILENO;
 	else
-		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd == -1)
-		perror(file);
-	return (fd);
+		target = STDOUT_FILENO;
+	if (dup2(fd, target) == -1)
+	{
+		perror("minishell: dup2");
+		close(fd);
+		return (-1);
+	}
+	close(fd);
+	return (0);
 }
 
-int do_redirs(t_redir *r)
+int	do_redirs(t_redir *r)
 {
-	int fd;
+	int	fd;
 
 	while (r)
 	{
 		if (r->type == HEREDOC && r->fd == -1)
 			return (-1);
-		if (r->type == REDIR_IN)
-			fd = open_inputfile(r->file);
-		else if (r->type == REDIR_OUT)
-			fd = open_outputfile(r->file, 0);
-		else if (r->type == REDIR_OUT_APP)
-			fd = open_outputfile(r->file, 1);
-		else
-			fd = r->fd;
+		fd = open_one_redir(r);
 		if (fd == -1)
 			return (-1);
-		if (r->type == REDIR_IN || r->type == HEREDOC)
-			dup2(fd, 0);
-		else
-			dup2(fd, 1);
-		close(fd);
+		if (dup_one_redir(fd, r) == -1)
+			return (-1);
 		r = r->next;
 	}
 	return (0);
 }
 
-int apply_redirs(t_redir *r)
+int	apply_redirs(t_redir *r)
 {
 	return (do_redirs(r));
 }
