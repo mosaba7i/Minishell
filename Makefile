@@ -20,7 +20,7 @@ SRCS	= main.c main_utils.c main_utils2.c init_shell.c \
 	builtins/echo.c builtins/cd.c builtins/pwd.c builtins/env.c \
 	builtins/export.c builtins/export_utils.c builtins/unset.c builtins/exit.c \
 	builtins/export_list.c builtins/env_helpers.c builtins/env_list.c builtins/is_valid.c \
-	exe/exe_helpers.c exe/exe_utils.c exe/sigs_handlers.c exe/sigs_init.c exe/env2array.c exe/gettingpath.c exe/redir.c exe/redir_io.c exe/run_child.c exe/child_cleanup.c exe/execute_core.c exe/execute_loop.c exe/execute_one.c exe/execute_pipeline.c exe/builtin_parent.c exe/exe.c
+	exe/exe_helpers.c exe/exe_utils.c exe/sigs_handlers.c exe/sigs_init.c exe/env2array.c exe/gettingpath.c exe/redir.c exe/redir_io.c exe/run_child.c exe/child_cleanup.c exe/execute_one.c exe/execute_pipeline.c exe/builtin_parent.c exe/exe.c
 
 OBJS	= $(SRCS:.c=.o)
 
